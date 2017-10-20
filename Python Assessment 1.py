@@ -1,6 +1,4 @@
 import csv
-from collections import Counter
-from geotext import GeoText
 
 food = list(csv.DictReader(open('Food_Inspections.csv')))
 column = input('Enter the column you want to process or enter nothing to escape: ')
