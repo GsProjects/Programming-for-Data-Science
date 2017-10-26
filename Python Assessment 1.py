@@ -10,17 +10,19 @@ if column != '':
 
 def remove_duplicate_locations(data):
     print('In remove_duplicate_locations')
-    result = remove_AKA(data)
+    result = ammend_AKA(data)
     temp_data = []
     location = set()
     #  If location col empty populate with longitude and latitude
     for x in result:
         if x['Location'] == '':
-            print('Empty locations')
             location.add(x['Latitude'])
             location.add(x['Longitude'])
             x['Location'] = location
             temp_data.append(x)
+        else:
+            temp_data.append(x)
+
     #  Remove longitude and latitude columns
     new_data = []
     for item in temp_data:
@@ -30,11 +32,21 @@ def remove_duplicate_locations(data):
     return new_data
 
 
-def remove_AKA(data):
+def ammend_AKA(data):
+    print('In ammend AKA')
     result = clean_text_data(data)
     new_data = []
     for item in result:
-        del item['AKA Name']  # removing AKA Name column
+        dba_name = item['DBA Name'].split()
+        aka_name = set(item['AKA Name'].split())
+        common = [x for x in dba_name if
+                  x in aka_name]  # this comprehension will maintain the order of the common elements
+        new_name = ''
+        if len(common) != 0:  # if there is common elements
+            for items in common:
+                new_name = new_name + ' ' + items
+            item['DBA Name'] = new_name
+            item['AKA Name'] = new_name
         new_data.append(item)
     return new_data
 
@@ -68,9 +80,9 @@ def ammend_city(data):
         if city in x['City'].lower():
             new_data.append(x)
         else:
-            result.remove(x) #if city is not chicago delete the row
+            result.remove(x)  # if city is not chicago delete the row
 
-    for item in new_data:
+    for item in new_data:  # following this delete the city column completely
         del item['City']
 
     return new_data
@@ -92,8 +104,8 @@ def write_data(data):
         out_csv.writerows(data)
 
 
-result = ammend_DBA(food)
-'''temporary = {row[column] for row in result}
+result = remove_duplicate_locations(food)
+temporary = {row[column] for row in result}
 print(temporary)
-print(len(temporary))'''
-write_data(result)
+print(len(temporary))
+#write_data(result)
