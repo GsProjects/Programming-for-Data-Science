@@ -10,7 +10,7 @@ if column != '':
 
 def remove_duplicate_locations(data):
     print('In remove_duplicate_locations')
-    result = ammend_DBA(data)
+    result = remove_AKA(data)
     temp_data = []
     location = set()
     #  If location col empty populate with longitude and latitude
@@ -30,19 +30,11 @@ def remove_duplicate_locations(data):
     return new_data
 
 
-def ammend_DBA(data):
+def remove_AKA(data):
     result = clean_text_data(data)
     new_data = []
     for item in result:
-        dba_name = item['DBA Name'].split()
-        aka_name = set(item['AKA Name'].split())
-        common = [x for x in dba_name if x in aka_name]  # this comprehension will maintain the order of the common elements
-        new_name = ''
-        if len(common) != 0:  # if there is common elements
-            for items in common:
-                new_name = new_name + ' ' + items
-            item['DBA Name'] = new_name
-            item['AKA Name'] = new_name
+        del item['AKA Name']  # removing AKA Name column
         new_data.append(item)
     return new_data
 
@@ -51,7 +43,7 @@ def clean_text_data(data):
     print('In clean_text_data')
     result = ammend_city(data)
     new_data = []
-    text_based_columns = ['DBA Name', 'AKA Name', 'Inspection Type']
+    text_based_columns = ['DBA Name', 'Inspection Type']
     for x in result:
         for value in x:
             x[value] = x[value].lower()
@@ -62,8 +54,7 @@ def clean_text_data(data):
                 x[item] = x[item].replace(",", "")
                 x[item] = x[item].replace("-", " ")
                 x[item] = x[item].replace("/", " ")
-        if x['AKA Name'] == '':
-            x['AKA Name'] = x['DBA Name']
+
         new_data.append(x)
     return new_data
 
