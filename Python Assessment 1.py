@@ -10,7 +10,7 @@ if column != '':
 
 def remove_duplicate_locations(data):
     print('In remove_duplicate_locations')
-    result = ammend_AKA(data)
+    result = alter_names(data)
     temp_data = []
     location = set()
     #  If location col empty populate with longitude and latitude
@@ -32,11 +32,11 @@ def remove_duplicate_locations(data):
     print(len(new_data))
     return new_data
 
-
-def ammend_AKA(data):
+#  GETTING COMMON ELEMENTS FROM DBA AND AKA NAMES
+#  THEN SETTING THE COMMON ELEMENTS AS THE VALUES
+def alter_names(data):
     print('In ammend AKA')
     result = clean_text_data(data)
-    new_data = []
     for item in result:
         dba_name = item['DBA Name'].split()
         aka_name = set(item['AKA Name'].split())
@@ -48,15 +48,12 @@ def ammend_AKA(data):
                 new_name = new_name + ' ' + items
             item['DBA Name'] = new_name
             item['AKA Name'] = new_name
-        new_data.append(item)
-    print(len(new_data))
-    return new_data
+    return result
 
 
 def clean_text_data(data):
     print('In clean_text_data')
     result = ammend_city(data)
-    new_data = []
     text_based_columns = ['DBA Name', 'AKA Name', 'Inspection Type']
     for x in result:
         for value in x:
@@ -95,24 +92,39 @@ def ammend_city(data):
 def remove_state(data):
     print('In remove_state')
     result = change_date_format(data)
-    new_data = []
     for x in result:
         del x['State']
-        new_data.append(x)
-    print(len(new_data))
-    return new_data
+    return result
 
 
 def change_date_format(data):
     print('In change_date_format')
-    new_data = []
-    for x in data:
+    result = fill_cells(data)
+    for x in result:
         temporary_date = x['Inspection Date'].split('/')
         new_date = temporary_date[1] + '/' + temporary_date[0] + '/' + temporary_date[2]
         x['Inspection Date'] = new_date
-        new_data.append(x)
-    print(len(new_data))
-    return new_data
+    return result
+
+
+def fill_cells(data):
+    print('In change_date_format')
+    result = fill_names(data)
+    for x in result:
+        for value in x.keys():
+            if x[value] == '':
+                x[value] = 'NULL'
+    return data
+
+
+def fill_names(data):
+    print('In change_date_format')
+    for x in data:
+        if x['DBA Name'] == '':
+            x['DBA Name'] = x['AKA Name']
+        elif x['AKA Name'] == '':
+            x['AKA Name'] = x['DBA Name']
+    return data
 
 
 def write_data(data):
@@ -133,3 +145,6 @@ result = remove_duplicate_locations(food)
 for item in a:
     print(len(item[0]))'''
 write_data(result)
+
+
+#  extract a copy of dba name column
