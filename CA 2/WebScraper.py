@@ -17,8 +17,7 @@ def parse_html(content):
     start_rows = 2  # first two rows contain headers
     new_index = 2
     for index, rows in enumerate(table_rows[start_rows:],start=2): #  index starts at 2 to skip first two rows
-        #print(rows.name)
-        if new_index < 81:
+        if new_index < 82:
             row = table_rows[new_index]
             if len(row.td.attrs) > 0: #  if the td tag has one or more attributes
                 print('IN IF  1')
@@ -26,11 +25,10 @@ def parse_html(content):
                     print('IN IF  2')
                     attribute = row.td.attrs['rowspan']
                     num_merged = int(attribute) + 1
-                    merged_rows = [items for items in table_rows[index: index + num_merged]]
-                    print('MERGED ROWS:   \n', merged_rows)
+                    merged_rows = [items for items in table_rows[new_index: new_index + num_merged]]
                     parse_rows(merged_rows)
                     merged_rows = []
-                    new_index = new_index + num_merged
+                    new_index = new_index + num_merged - 1
                     num_merged = 0
 
                 # NEED ELSE TO DEAL WITH TD tags that have a style attribute
@@ -41,6 +39,7 @@ def parse_html(content):
 
             else:
                 print('IN ELSE  2')
+                print('THE INDEX: ' , new_index)
                 new_index += 1
                 parse_rows(row)
 
@@ -55,30 +54,49 @@ def remove_tags(data):
 
 
 def parse_rows(rows):
-    for items in rows:
-        #print('LENGTH:   ',len(items))
-        if len(items) > 1:
-            #check if the td tag has an embedded rowspan
-            embedded_rows =[]
+    #print(rows)
+    #print(len(rows))
+    if len(rows) > 1:
+        for items in rows:
+            #print('LENGTH:   ',len(items))
+            #print('ITEMS  \n:   ', items)
+            if len(items) > 1:
+                #check if the td tag has an embedded rowspan
+                embedded_rows =[]
 
-            if items.td:
-                if len(items.td.attrs) > 0:  # if the td tag has one or more attributes
-                    if 'rowspan' in items.td.attrs:  # if theres a rowspan
-                        embedded_rows = [row for row in items]
+                '''if items.td:
+                    if len(items.td.attrs) > 0:  # if the td tag has one or more attributes
+                        if 'rowspan' in items.td.attrs:  # if theres a rowspan
+                            embedded_rows = [row for row in items]'''
 
-            table_data = items.findAll('td')
-            #print(type(table_data))
+                table_data = items.findAll('td')
+                #print(type(table_data))
+
+                president_data = [item for item in table_data]
+                with open('Row.txt', 'a') as file:
+                    for item in president_data[1:]: # skip first element as it is just a column number
+                        #print(item.get_text())
+                        file.write(item.get_text() + '\n')
+                    print('###############################')
+                    file.write('ROWSPAN' + '\n')
+                    file.write('################################' + '\n')
+                    file.close()
+
+    else:
+        print('YURT')
+
+        '''if len(rows) < 1:
+            print('IN HERE')
+            table_data = rows.findAll('td')
 
             president_data = [item for item in table_data]
             with open('Row.txt', 'a') as file:
-                for item in president_data[1:]: # skip first element as it is just a column number
+                for item in president_data[1:]:  # skip first element as it is just a column number
                     #print(item.get_text())
                     file.write(item.get_text() + '\n')
-                print('###############################')
-                file.write('ROWSPAN' + str(len(items)) + str(items) + ' '  + '\n')
+                file.write('NONE' + '\n')
                 file.write('################################' + '\n')
-                file.close()
-
+                file.close()'''
     return True
 
 
