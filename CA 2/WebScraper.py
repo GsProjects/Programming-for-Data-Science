@@ -17,6 +17,7 @@ def parse_html(content):
     start_rows = 2  # first two rows contain headers
     new_index = 2
     for index, rows in enumerate(table_rows[start_rows:],start=2): #  index starts at 2 to skip first two rows
+        #print(rows.name)
         if new_index < 81:
             row = table_rows[new_index]
             if len(row.td.attrs) > 0: #  if the td tag has one or more attributes
@@ -54,44 +55,30 @@ def remove_tags(data):
 
 
 def parse_rows(rows):
-    if len(rows) > 1:
-        for items in rows:
-            #print('LENGTH:   ',len(items))
-            if len(items) > 1:
-                #check if the td tag has an embedded rowspan
-                embedded_rows =[]
+    for items in rows:
+        #print('LENGTH:   ',len(items))
+        if len(items) > 1:
+            #check if the td tag has an embedded rowspan
+            embedded_rows =[]
 
-                if items.td:
-                    if len(items.td.attrs) > 0:  # if the td tag has one or more attributes
-                        if 'rowspan' in items.td.attrs:  # if theres a rowspan
-                            embedded_rows = [row for row in items]
+            if items.td:
+                if len(items.td.attrs) > 0:  # if the td tag has one or more attributes
+                    if 'rowspan' in items.td.attrs:  # if theres a rowspan
+                        embedded_rows = [row for row in items]
 
-                table_data = items.findAll('td')
-                #print(type(table_data))
-
-                president_data = [item for item in table_data]
-                with open('Row.txt', 'a') as file:
-                    for item in president_data[1:]: # skip first element as it is just a column number
-                        #print(item.get_text())
-                        file.write(item.get_text() + '\n')
-                    print('###############################')
-                    file.write('ROWSPAN' + '\n')
-                    file.write('################################' + '\n')
-                    file.close()
-
-    else:
-        if len(rows) <= 1:
-            print('IN HERE')
-            table_data = rows.findAll('td')
+            table_data = items.findAll('td')
+            #print(type(table_data))
 
             president_data = [item for item in table_data]
             with open('Row.txt', 'a') as file:
-                for item in president_data[1:]:  # skip first element as it is just a column number
+                for item in president_data[1:]: # skip first element as it is just a column number
                     #print(item.get_text())
                     file.write(item.get_text() + '\n')
-                file.write('NONE' + '\n')
+                print('###############################')
+                file.write('ROWSPAN' + str(len(items)) + str(items) + ' '  + '\n')
                 file.write('################################' + '\n')
                 file.close()
+
     return True
 
 
