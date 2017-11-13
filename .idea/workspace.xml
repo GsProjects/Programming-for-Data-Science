@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="19679ab0-681d-4202-b2b1-02bcfec9f155" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/CA 2/Row.txt" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CA 2/WebScraper.py" afterPath="$PROJECT_DIR$/CA 2/WebScraper.py" />
     </list>
     <ignored path="Programming.iws" />
@@ -26,8 +24,8 @@
       <file leaf-file-name="WebScraper.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CA 2/WebScraper.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-385">
-              <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+            <state relative-caret-position="273">
+              <caret line="69" column="0" lean-forward="true" selection-start-line="69" selection-start-column="0" selection-end-line="69" selection-end-column="0" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
               </folding>
@@ -567,8 +565,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CA 2/WebScraper.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-385">
-          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+        <state relative-caret-position="273">
+          <caret line="69" column="0" lean-forward="true" selection-start-line="69" selection-start-column="0" selection-end-line="69" selection-end-column="0" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
           </folding>

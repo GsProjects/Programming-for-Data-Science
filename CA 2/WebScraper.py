@@ -52,24 +52,9 @@ def parse_rows(rows):
     for items in rows:
         if len(items) > 1:
             #check if the td tag has an embedded rowspan
-            embedded_rows =[]
-
-            '''if items.td:
-                if len(items.td.attrs) > 0:  # if the td tag has one or more attributes
-                    if 'rowspan' in items.td.attrs:  # if theres a rowspan
-                        embedded_rows = [row for row in items]'''
 
             table_data = items.findAll('td')
-            #print(type(table_data))
-
             president_data = [item for item in table_data]
-            '''with open('Row.txt', 'a') as file:
-                for item in president_data[1:]: # skip first element as it is just a column number
-                    file.write(item.get_text() + '\n')
-                print('###############################')
-                file.write('ROWSPAN' + '\n')
-                file.write('################################' + '\n')
-                file.close()'''
     with open('Row.txt', 'a') as file:
         for item in president_data[1:]:  # skip first element as it is just a column number
             text = item.get_text()
@@ -81,8 +66,6 @@ def parse_rows(rows):
         file.close()
 
     return True
-
-
 
 
 result = get_html()
