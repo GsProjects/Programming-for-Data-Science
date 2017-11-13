@@ -17,12 +17,10 @@ def parse_html(content):
     start_rows = 2  # first two rows contain headers
     new_index = 2
     for index, rows in enumerate(table_rows[start_rows:],start=2): #  index starts at 2 to skip first two rows
-        if new_index < 82:
+        if new_index < len(table_rows):
             row = table_rows[new_index]
             if len(row.td.attrs) > 0: #  if the td tag has one or more attributes
-                print('IN IF  1')
                 if 'rowspan' in row.td.attrs: # if theres a rowspan
-                    print('IN IF  2')
                     attribute = row.td.attrs['rowspan']
                     num_merged = int(attribute) + 1
                     merged_rows = [items for items in table_rows[new_index: new_index + num_merged]]
@@ -33,17 +31,12 @@ def parse_html(content):
 
                 # NEED ELSE TO DEAL WITH TD tags that have a style attribute
                 else: #  if not a rowspan attribute
-                    print('IN ELSE  1')
                     parse_rows(row)
                     new_index += 1
 
             else:
-                print('IN ELSE  2')
-                print('THE INDEX: ' , new_index)
                 new_index += 1
                 parse_rows(row)
-
-        #break
 
 
 def remove_tags(data):
@@ -54,49 +47,39 @@ def remove_tags(data):
 
 
 def parse_rows(rows):
-    #print(rows)
-    #print(len(rows))
-    if len(rows) > 1:
-        for items in rows:
-            #print('LENGTH:   ',len(items))
-            #print('ITEMS  \n:   ', items)
-            if len(items) > 1:
-                #check if the td tag has an embedded rowspan
-                embedded_rows =[]
+    president_data =[]
+    parsed_row=[]
+    for items in rows:
+        if len(items) > 1:
+            #check if the td tag has an embedded rowspan
+            embedded_rows =[]
 
-                '''if items.td:
-                    if len(items.td.attrs) > 0:  # if the td tag has one or more attributes
-                        if 'rowspan' in items.td.attrs:  # if theres a rowspan
-                            embedded_rows = [row for row in items]'''
+            '''if items.td:
+                if len(items.td.attrs) > 0:  # if the td tag has one or more attributes
+                    if 'rowspan' in items.td.attrs:  # if theres a rowspan
+                        embedded_rows = [row for row in items]'''
 
-                table_data = items.findAll('td')
-                #print(type(table_data))
-
-                president_data = [item for item in table_data]
-                with open('Row.txt', 'a') as file:
-                    for item in president_data[1:]: # skip first element as it is just a column number
-                        #print(item.get_text())
-                        file.write(item.get_text() + '\n')
-                    print('###############################')
-                    file.write('ROWSPAN' + '\n')
-                    file.write('################################' + '\n')
-                    file.close()
-
-    else:
-        print('YURT')
-
-        '''if len(rows) < 1:
-            print('IN HERE')
-            table_data = rows.findAll('td')
+            table_data = items.findAll('td')
+            #print(type(table_data))
 
             president_data = [item for item in table_data]
-            with open('Row.txt', 'a') as file:
-                for item in president_data[1:]:  # skip first element as it is just a column number
-                    #print(item.get_text())
+            '''with open('Row.txt', 'a') as file:
+                for item in president_data[1:]: # skip first element as it is just a column number
                     file.write(item.get_text() + '\n')
-                file.write('NONE' + '\n')
+                print('###############################')
+                file.write('ROWSPAN' + '\n')
                 file.write('################################' + '\n')
                 file.close()'''
+    with open('Row.txt', 'a') as file:
+        for item in president_data[1:]:  # skip first element as it is just a column number
+            text = item.get_text()
+            text = text.replace('\n',' ')
+            text = text.replace('\n–\n',' ')
+            parsed_row.append(text)
+        file.write(str(parsed_row))
+        file.write('################################################### \n')
+        file.close()
+
     return True
 
 
