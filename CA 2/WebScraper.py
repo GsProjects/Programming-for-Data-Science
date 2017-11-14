@@ -25,9 +25,6 @@ def parse_html(content):
                     attribute = row.td.attrs['rowspan']
                     num_merged = int(attribute)
                     merged_rows = [items for items in table_rows[new_index: new_index + num_merged]]
-                    #print('MERGED ROW   1')
-                    #print(merged_rows)
-                    #print('############################################')
                     parse_rows(merged_rows)
                     merged_rows = []
                     new_index = new_index + num_merged
@@ -35,19 +32,11 @@ def parse_html(content):
 
                 # NEED ELSE TO DEAL WITH TD tags that have a style attribute
                 else: #  if not a rowspan attribute
-                    print('############################################')
-                    print('MERGED ROW   2')
-                    print(row)
-                    print('############################################')
                     parse_rows(row)
                     new_index += 1
 
             else:
                 new_index += 1
-                print('############################################')
-                print('MERGED ROW   3')
-                print(row)
-                print('############################################')
                 parse_rows(row)
 
 
@@ -60,50 +49,62 @@ def remove_tags(data):
 
 def parse_rows(rows):
     president_rows=[]
-    parsed_row=[]
-
-
     for items in rows:
         if len(items) >= 1:
             if type(items) is not bs4.element.NavigableString:
                 #check if the td tag has an embedded rowspan
 
-
-
                 table_data = items.findAll('td')
                 if table_data == []:
+                    #links = items.findAll('a', href=True)
+                    #state_links = [link for link in links if 'class' not in link.attrs and len(link.attrs) == 2 and 'Presidencey' not in link.attrs['href'] ]
                     president_rows.extend(items)
+
                 president_data = [item for item in table_data]
                 president_rows.extend(president_data)
 
-        else:
-            if items.name == 'td':
-                #  contains all the links required for part two
-                print('')
-
     separate_data(president_rows)
-    #president_data = []
-
-
     return True
 
 
 def separate_data(president_rows):
     parsed_row =[]
     with open('Row.txt', 'a') as file:
-        for item in president_rows[1:]:  # skip first element as it is just a column number
+        for item in president_rows[1:]: #  skip first element as its just a column number
             if type(item) is not bs4.element.NavigableString:
-                #print('ITEM:     ' , item , '\n')
                 text = item.get_text()
+                text.strip('')
                 text = text.replace('\n',' ')
                 text = text.replace('\n–\n',' ')
+                text = text.replace("\xa0",'')
                 parsed_row.append(text)
         if len(parsed_row) > 0:
+            parse_text_data(parsed_row)
             file.write(str(parsed_row))
             file.write('###################################################')
             file.write(str(len(parsed_row)))
             file.write('\n')
             file.close()
+
+
+def parse_text_data(data):
+    if len(data) == 9:
+        temporary = data[-2]  # stores the vp name
+        data[-2] = data[-1]
+        data[-1] = temporary
+    '''if len(data) == 10:
+        print('')
+        for index,items in enumerate(data):
+            if items.count('(') == 2:
+
+                print(items, ' ', index)
+        second_date = data[index]
+        data[index-1]
+        print('\n')
+        #print(data)'''
+    if len(data)==15:
+        print('')
+        print(data)
 
 
 result = get_html()
