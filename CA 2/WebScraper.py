@@ -1,7 +1,7 @@
 import bs4
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
-import datetime
+import calendar
 
 
 def get_html():
@@ -137,7 +137,8 @@ def prep_data(data):
     president_name= ''
     president_age = ''
     presidential_status =''
-    status = ['(Died', '(Resigned']
+    first_vp_data =''
+    status = ['(Died', '(Resigned','(Succeeded']
     print('')
     print('')
 
@@ -163,7 +164,7 @@ def prep_data(data):
 
     if len(data) >= 4:
 
-        #DIED IN OFFICE AND SUCCEEDED TO PRESIDENCY
+        #DIED IN OFFICE
         for items in status:
             for elements in presidency_dates[1].split():
 
@@ -179,8 +180,31 @@ def prep_data(data):
         information.append(president_name)
         information.append(president_age)
         information.append(data[2])
-        information.append(data[3])
-        print(information)
+        #  if they succeeded to presidency
+        for items in status:
+            for elements in data[3].split():
+                if items == elements:
+                    for element in data[3].split()[ : data[3].split().index(items)]:
+                        first_vp_data += element + ' '  #  remove the bracket
+
+        if first_vp_data == '':
+            first_vp_data = data[3]
+
+        for elements in first_vp_data.split():
+            if elements == '–':
+                print(first_vp_data.split())
+                hyphen_index = first_vp_data.split().index(elements)
+                if first_vp_data.split()[ hyphen_index - 3] in calendar.month_name:
+                    first_vp_name = first_vp_data.split()[ : hyphen_index - 3]
+                    print('VP NAME: ', first_vp_name)
+                elif first_vp_data.split()[ hyphen_index - 2] in calendar.month_name:
+                    first_vp_name = first_vp_data.split()[: hyphen_index - 2]
+                    print('VP NAMEs: ', first_vp_name)
+                #print('VP DATA: ', data)
+
+
+        #information.append(first_vp_data)
+
 
 
     if len(data) > 4:
@@ -193,7 +217,28 @@ def prep_data(data):
             party = [items for items in data[5].split() if items in parties]
 
 
+'''def parse_president_info(data):
+    president_info = []
+    president_name = '' 
+    new_data = []
+    for index, items in enumerate(data[1].split()):
+        if items == '(Lived:' or items == 'years)' or items == 'years' or items == 'old)' or items == 'Born':
+            items = ''
+        if len(items) > 1:  # remove the spaces left by the previous if statement
+            if items[0] == '(':  # if the age is displayed as (93 only take everything after the (
+                items = items[1:]
+            president_info.append(items)
 
+    president_info.remove(president_info[-2])  # remove the year the president was born and or died
+
+    for items in president_info[:-1]:
+        president_name += items + ' '
+
+    president_age = president_info[-1]
+
+    new_data.append(president_name)
+    new_data.append(president_age)
+    return new_data'''
 
 
 
