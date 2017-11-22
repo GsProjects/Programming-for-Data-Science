@@ -2,6 +2,8 @@ import bs4
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import calendar
+import mysql.connector
+from collections import Counter
 
 
 def get_html():
@@ -18,11 +20,11 @@ def parse_html(content):
     table_rows = president_table.find_all('tr')
     start_rows = 2  # first two rows contain headers
     new_index = 2
-    for index, rows in enumerate(table_rows[start_rows:],start=2): #  index starts at 2 to skip first two rows
+    for index, rows in enumerate(table_rows[start_rows:],start=2):  # index starts at 2 to skip first two rows
         if new_index < len(table_rows):
             row = table_rows[new_index]
-            if len(row.td.attrs) > 0: #  if the td tag has one or more attributes
-                if 'rowspan' in row.td.attrs: # if theres a rowspan
+            if len(row.td.attrs) > 0:  # if the td tag has one or more attributes
+                if 'rowspan' in row.td.attrs:  # if theres a rowspan
                     attribute = row.td.attrs['rowspan']
                     num_merged = int(attribute)
                     merged_rows = [items for items in table_rows[new_index: new_index + num_merged]]
@@ -31,8 +33,7 @@ def parse_html(content):
                     new_index = new_index + num_merged
                     num_merged = 0
 
-                # NEED ELSE TO DEAL WITH TD tags that have a style attribute
-                else: #  if not a rowspan attribute
+                else:  # if not a rowspan attribute
                     parse_rows(row)
                     new_index += 1
 
@@ -41,7 +42,7 @@ def parse_html(content):
                 parse_rows(row)
 
 
-def remove_tags(data):
+def remove_tags(data):  # removes the citation data in the cells
     unwanted_tags = ['sup','br']
     for element in data([item for item in unwanted_tags]):
         element.decompose()
@@ -49,47 +50,38 @@ def remove_tags(data):
 
 
 def parse_rows(rows):
-    president_rows = []
-    president_data = []
     table_data = []
-    for items in rows: #  for each td element in the list
+    for items in rows:  # for each td element in the list
         if len(items) >= 1:
             if type(items) is not bs4.element.NavigableString:
                 if items.name =='td':
-                    table_data.append(items) #  if the rowspan is one
+                    table_data.append(items)  # if the rowspan is one
 
                 else:
                     #  if the president has multiple rows
-                    table_data.extend(items.findAll('td')) #  get all the td elements in the row
-
+                    table_data.extend(items.findAll('td'))  # get all the td elements in the row
 
     td_data = parse_td_data(table_data)
     separate_data(td_data)
     return True
 
 
-
 def separate_data(president_rows):
     parsed_row =[]
     if len(president_rows) > 0:
-        with open('Row.txt', 'a') as file:
-            for item in president_rows:
+        for item in president_rows:
 
-                if type(item) is not bs4.element.NavigableString:
-                    text = item.get_text()
-                    text.strip('')
-                    text = text.replace('\n',' ')
-                    text = text.replace('\n–\n',' ')
-                    text = text.replace("\xa0",'')
-                    parsed_row.append(text)
-            if len(parsed_row) > 0:
-
-                prep_data(parsed_row)
-                file.write(str(parsed_row))
-                file.write('###################################################')
-                file.write(str(len(parsed_row)))
-                file.write('\n')
-                file.close()
+            if type(item) is not bs4.element.NavigableString:
+                text = item.get_text()
+                text.strip('')
+                text = text.replace('\n',' ')
+                text = text.replace('\n–\n',' ')
+                text = text.replace("\xa0",'')
+                text = text.replace("National Union April 15, 1865 – c.\u20091868",'National Union') #  special case for andrew johnson
+                text = text.replace("Democratic c.\u20091868 – March 4, 1869 ", 'Democratic')
+                parsed_row.append(text)
+        if len(parsed_row) > 0:
+            prep_data(parsed_row)
 
 
 def parse_td_data(data):
@@ -101,10 +93,10 @@ def parse_td_data(data):
             data.remove(data[items])
 
         for items in data:
-            if len(items.get_text()) >= 15 and len(items.get_text()) <= 18: #  remove data from term column
+            if len(items.get_text()) >= 15 and len(items.get_text()) <= 18:  # remove data from term column
                 data.remove(items)
 
-            if len(items.get_text()) >= 23 and len(items.get_text()) <= 24: #  special case for when the term data is longer than normal e.g Abraham Lincoln
+            if len(items.get_text()) >= 23 and len(items.get_text()) <= 24:  # special case for when the term data is longer than normal e.g Abraham Lincoln
                 data.remove(items)
 
     elif len(data) <= 8:
@@ -117,7 +109,7 @@ def parse_td_data(data):
             if len(items.get_text()) >= 15 and len(items.get_text()) <= 18:
                 data.remove(items)
 
-            if len(items.get_text()) >= 23 and len(items.get_text()) <= 24: #  special case for when the term data is longer than normal e.g Abraham Lincoln
+            if len(items.get_text()) >= 23 and len(items.get_text()) <= 24:  # special case for when the term data is longer than normal e.g Abraham Lincoln
                 data.remove(items)
 
     return data
@@ -129,7 +121,7 @@ def prep_data(data):
     print('')
 
     #  split the presidency dates
-    presidency_dates = data[0].split('–') #  possible encoding error with the hyphen as the mac hyphen will not work in the split function
+    presidency_dates = data[0].split('–')  # possible encoding error with the hyphen as the mac hyphen will not work in the split function
 
     #  split the president information
     president_info = parse_president_info(data)
@@ -139,7 +131,7 @@ def prep_data(data):
         presidency_info = presidency_information(presidency_dates)
 
         information.extend(presidency_info)
-        information.extend(president_info) #  set to '' at top if nothing is found
+        information.extend(president_info)  # set to '' at top if nothing is found
 
 
         # DO THIS:   special case where date accompanies the whig party for john tyler
@@ -147,9 +139,7 @@ def prep_data(data):
             if data[2].split()[0] == 'Whig':
                 information.append({'Party': data[2].split()[0]})
         else:
-            information.append({'Party':data[2]}) #  appends the party name
-
-
+            information.append({'Party':data[2]})  # appends the party name
 
         if len(data) >= 4:
             vp_data = vp_info(data[3], presidency_info[0], presidency_info[1],information)
@@ -169,9 +159,12 @@ def prep_data(data):
             vp_data = vp_info(data[6], presidency_info[0], presidency_info[1],information)
             information.extend(vp_data)
 
-
-        print(information)
-
+        with open('Info.txt','a') as file:
+            file.write(str(information))
+            file.write(' ')
+            file.write(' ')
+        file.close()
+        prepare_insert(information)
 
 
 def parse_president_info(data):
@@ -199,10 +192,11 @@ def parse_president_info(data):
 
     president_age = president_info[-1]
 
-    new_data.append({'President Name':president_name})
-    new_data.append({'Year of Birth':year_of_birth})
-    new_data.append({'President Age':president_age})
+    new_data.append({'President_Name':president_name})
+    new_data.append({'Year_of_Birth':year_of_birth})
+    new_data.append({'President_Age':president_age})
     return new_data
+
 
 def presidency_information(presidency_dates):
 
@@ -215,33 +209,30 @@ def presidency_information(presidency_dates):
 
                 presidency_dates[1] = presidency_dates[1][ :presidency_dates[1].index(items)]  # get the date up until the status
 
-                new_data.append({'Presidency Start':presidency_dates[0]})
-                new_data.append({'Presidency End':presidency_dates[1]})
+                new_data.append({'Presidency_Start':presidency_dates[0]})
+                new_data.append({'Presidency_End':presidency_dates[1]})
                 new_data.append({'Status':presidential_status})
     if len(new_data) == 0:
-        #new_data = presidency_dates
-        new_data.append({'Presidency Start': presidency_dates[0]})
-        new_data.append({'Presidency End': presidency_dates[1]})
-        new_data.append({'Status':''}) # add an empty field to represent status...for easier insertion in db
+        new_data.append({'Presidency_Start': presidency_dates[0]})
+        new_data.append({'Presidency_End': presidency_dates[1]})
+        new_data.append({'Status':''})  # add an empty field to represent status...for easier insertion in db
 
     return new_data
-
 
 
 def vp_info(data, start_vacancy, end_vacancy,information):
 
     status = ['(Died', '(Resigned', '(Succeeded', '(Balance']
     new_data =[]
-
     first_vp_data = data
-    if data == 'Office vacant': # if the vp is vacant for the entire presidency use presidency dates of vacancy dates
+    if data == 'Office vacant':  # if the vp is vacant for the entire presidency use presidency dates of vacancy dates
         new_data.append({'Vacant': data})
-        new_data.append({'Vacant Start': start_vacancy})
-        new_data.append({'Vacant End': end_vacancy})
+        new_data.append({'Vacant_Start': start_vacancy['Presidency_Start']})
+        new_data.append({'Vacant_End': end_vacancy['Presidency_End']})
 
-    elif len(data.split()) <= 4: #  if theres only one vice president, len of <=4 for people like George H. W. Bush
-        new_data.append({'Vice President Name': data})
-    elif len(data.split()) >= 0 and '–' not in data.split(): #  if the vice president had one of the statuses after their name with no date
+    elif len(data.split()) > 1 and len(data.split()) <= 4:  # if theres only one vice president, len of <=4 for people like George H. W. Bush
+        new_data.append({'Vice_President_Name': data})
+    elif len(data.split()) > 0 and '–' not in data.split(): #  if the vice president had one of the statuses after their name with no date
         for items in status:
             if items in data.split():
                 vp_name = ' '.join(data.split()[ :data.split().index(items)])
@@ -258,11 +249,11 @@ def vp_info(data, start_vacancy, end_vacancy,information):
 
                     if 'Vice President Start' == keys[0] and 'Vice President End' == keys[1]:
                         new_data.append({'Vacant': vp_name})
-                        new_data.append({'Vacant Start': dates[0]})
-                        new_data.append({'Vacant End': dates[1]})
+                        new_data.append({'Vacant_Start': dates[0]})
+                        new_data.append({'Vacant_End': dates[1]})
                 else:
                     # JOHN TYLER
-                    new_data.append({'Vice President Name': vp_name})
+                    new_data.append({'Vice_President_Name': vp_name})
 
     else:
         for elements in first_vp_data.split():
@@ -271,31 +262,32 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                if first_vp_data.split()[ hyphen_index - 3] in calendar.month_name:
                    first_vp_name = first_vp_data.split()[ : hyphen_index - 3]
                    vp_name = ' '.join(first_vp_name)
+
                    if vp_name == 'Office vacant':
                        end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
                        start_date = first_vp_data.split()[hyphen_index - 3: hyphen_index]
                        start_date = ' '.join(start_date)
 
                        new_data.append({'Vacant': vp_name})
-                       new_data.append({'Vacant Start': start_date})
-                       new_data.append({'Vacant End': end_date})
+                       new_data.append({'Vacant_Start': start_date})
+                       new_data.append({'Vacant_End': end_date})
 
                    else:
+                       if vp_name != 'Unaffiliated':
+                           end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
+                           start_date = first_vp_data.split()[hyphen_index - 3: hyphen_index]
+                           start_date = ' '.join(start_date)
 
-                       end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
-                       start_date = first_vp_data.split()[hyphen_index - 3: hyphen_index]
-                       start_date = ' '.join(start_date)
-
-                       new_data.append({'Vice President Name': vp_name})
-                       new_data.append({'Vice President Start': start_date})
-                       new_data.append({'Vice President End': end_date})
+                           new_data.append({'Vice_President_Name': vp_name})
+                           new_data.append({'Vice_President_Start': start_date})
+                           new_data.append({'Vice_President_End': end_date})
 
 
                elif first_vp_data.split()[ hyphen_index - 2] in calendar.month_name:
                    first_vp_name = first_vp_data.split()[: hyphen_index - 2]
                    vp_name = ' '.join(first_vp_name)
-                   if vp_name == 'Office vacant':
 
+                   if vp_name == 'Office vacant':
                        end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
                        start_date = first_vp_data.split()[hyphen_index - 2: hyphen_index]
                        start_date.append(end_date.split()[2])
@@ -303,23 +295,137 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                        #  if the year is missing because because they died or left in the same year then get the year from the end date
 
                        new_data.append({'Vacant': vp_name})
-                       new_data.append({'Vacant Start': start_date})
-                       new_data.append({'Vacant End': end_date})
-                   else:
+                       new_data.append({'Vacant_Start': start_date})
+                       new_data.append({'Vacant_End': end_date})
 
+                   else:
                        end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
                        start_date = first_vp_data.split()[hyphen_index - 2: hyphen_index]
                        start_date.append(end_date.split()[2])
                        start_date = ' '.join(start_date)
 
-                       new_data.append({'Vice President Name': vp_name})
-                       new_data.append({'Vice President Start': start_date})
-                       new_data.append({'Vice President End': end_date})
+                       new_data.append({'Vice_President_Name': vp_name})
+                       new_data.append({'Vice_President_Start': start_date})
+                       new_data.append({'Vice_President_End': end_date})
     return new_data
 
+
+def prepare_insert(information):
+
+    search_values = ['Vice','Vacant']
+    vice_president_table =[]
+    president_table = []
+
+    for dictionaries in information:
+        for key,value in dictionaries.items():
+            if search_values[0] in key or search_values[1] in key:
+                vice_president_table.append(dictionaries)
+            else:
+                president_table.append(dictionaries)
+
+    if(len(vice_president_table) > 0 ):  # add the president to all the vice president info
+        vice_president_table.append(information[3])
+
+    #print('vice_president_table ', vice_president_table)
+    #print('president_table ', president_table)
+
+
+    table_name_1 = 'Presidents'
+    table_name_2 = 'Vice_Presidents'
+    insert_data(president_table,table_name_1)
+    insert_vp_data(vice_president_table, table_name_2)
+
+
+def insert_data(president_data, name):
+    column_names =[]
+    column_data = []
+    values ='('
+
+    for dictionaries in president_data:
+        for key,value in dictionaries.items():
+            column_names.append(key)
+            column_data.append(value)
+
+    for items in column_data:
+        values += '%s, '
+
+    values = values[:-2]  # remove the last space and comma
+    values += ');'
+
+    insert_statement = 'Insert into ' + name + ' ('
+    insert_statement += ', '.join(column_names)
+    insert_statement += ')'
+    insert_statement += ' values ' + values
+    #print('INSERT STATEMENT: ', insert_statement)
+
+def insert_vp_data(table_data, table_name_2):
+    numbers = range(0,5)
+    occurrences = []
+    new_data =[]
+    print('TABLE DATA: ', table_data)
+    for dictionaries in table_data:
+        for key, value in dictionaries.items():
+            occurrences.append(key)
+
+    num = 1
+    for index,dictionaries in enumerate(table_data):
+        dictionary = table_data[index]
+        for key, value in dictionary.items():
+            if key != 'President_Name':
+                if occurrences.count(key) > 1:
+                    if key == 'Vice_President_Name' or key == 'Vacant':
+                    #print('KEY : ', key)
+
+                        #for key1, value in dictionaries.items(): #  enumerate so you can set the associated dates to same num
+
+                        key += str(num)
+                        #print('key: ', key)
+                        new_data.append({key:value})
+                        date1 = table_data[index + 1]
+                        #print('date1: ', date1)
+                        for key1,value1 in date1.items():
+                            key1 += str(num)
+                            new_data.append({key1: value1})
+                            #print(key1, ' ', value1)
+                        date2 = table_data[index + 2]
+                        #print('date2: ', date2)
+                        #print(index)
+                        #pass
+                        for key2, value2 in date2.items():
+                            key2 += str(num)
+                            new_data.append({key2: value2})
+                            #print(key2,' ', value2)
+
+                        index += 3
+                        num += 1
+                else:
+                    new_data.append({key:value})
+            else:
+                new_data.append({key: value})
+
+
+
+    print('NEW DATA: ', new_data)
+
+#if first key matches
+
+
+#  NEED TO ADD A NUMBER TO THE END OF ALL Vacant and vice president data
+#  Count the occurrence of a key in a list of dictionaries
+
+
+
+
+
+def create_connection():
+    cnx2 = mysql.connector.connect(host='localhost',
+                                   user='root', password='MyNewPass',
+                                   database='Web_Data')
+    return cnx2
 
 result = get_html()
 data = remove_tags(result)
 parse_html(data)
 
 
+#  create table Presidents (Presidency_Start Date, Presidency_End Date, Status varchar(50), President_Name varchar(50), Year_of_Birth int(11), President_Age int(11), Party varchar(50));
