@@ -140,7 +140,6 @@ def prep_data(data):
 
     #  split the president information
     president_info = parse_president_info(data)
-
     if len(data) >= 4:
 
         #  if they died in office
@@ -148,17 +147,20 @@ def prep_data(data):
 
         information.extend(presidency_info)
         information.extend(president_info) #  set to '' at top if nothing is found
-        information.append(data[2]) #  appends the party name
 
-        #  if they succeeded to presidency
-        #first_vp_data = vp_info(data[3],presidency_info[0], presidency_info[1])
-        #information.extend(first_vp_data)
 
-        if len(data) <= 4:
+        # DO THIS:   special case where date accompanies the whig party for john tyler
+        if len(data[2]) == 39:
+            if data[2].split()[0] == 'Whig':
+                information.append(data[2].split()[0])
+        else:
+            information.append(data[2]) #  appends the party name
+
+
+
+        if len(data) >= 4:
             vp_data = vp_info(data[3], presidency_info[0], presidency_info[1])
             information.extend(vp_data)
-            #print(data)
-            #print(vp_data)
 
         if len(data) >= 5:
             if len(data[4]) == 16:
@@ -174,8 +176,8 @@ def prep_data(data):
             vp_data = vp_info(data[6], presidency_info[0], presidency_info[1])
             information.extend(vp_data)
 
-        #information.extend(first_vp_data)
-        #print(information)
+
+        print(information)
 
 
 
@@ -183,7 +185,7 @@ def parse_president_info(data):
     president_info = []
     president_name = '' 
     new_data = []
-    print(data)
+
     for index, items in enumerate(data[1].split()):
         if items == '(Lived:' or items == 'years)' or items == 'years' or items == 'old)' or items == 'Born':
             items = ''
@@ -191,6 +193,11 @@ def parse_president_info(data):
             if items[0] == '(':  # if the age is displayed as (93 only take everything after the (
                 items = items[1:]
             president_info.append(items)
+
+    year_of_birth = president_info[-2]
+    if '–' in year_of_birth:
+        hyphen_index = year_of_birth.index('–')
+        year_of_birth = ''.join(year_of_birth[:hyphen_index])
 
     president_info.remove(president_info[-2])  # remove the year the president was born and or died
 
@@ -200,6 +207,7 @@ def parse_president_info(data):
     president_age = president_info[-1]
 
     new_data.append(president_name)
+    new_data.append(year_of_birth)
     new_data.append(president_age)
     return new_data
 
@@ -226,7 +234,7 @@ def presidency_information(presidency_dates):
 
 def vp_info(data, start_vacancy, end_vacancy):
 
-    status = ['(Died', '(Resigned', '(Succeeded']
+    status = ['(Died', '(Resigned', '(Succeeded', '(Balance']
     first_vp_data = ''
     new_data =[]
 
@@ -242,49 +250,44 @@ def vp_info(data, start_vacancy, end_vacancy):
             if items in data.split():
                 vp_name = ' '.join(data.split()[ :data.split().index(items)])
                 new_data.append(vp_name)
-    elif data[:13] == 'Office vacant': #  if its vacant for the balance of a term
-        new_data.append(data[:13])
+
     else:
         for elements in first_vp_data.split():
-               if elements == '–':
-                   hyphen_index = first_vp_data.split().index(elements)
-                   if first_vp_data.split()[ hyphen_index - 3] in calendar.month_name:
-                       first_vp_name = first_vp_data.split()[ : hyphen_index - 3]
-                       vp_name = ' '.join(first_vp_name)
-                       if vp_name == 'Office vacant':
-                           end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
-                           start_date = first_vp_data.split()[hyphen_index - 3: hyphen_index]
-                           start_date = ' '.join(start_date)
+            if elements == '–':
+               hyphen_index = first_vp_data.split().index(elements)
+               if first_vp_data.split()[ hyphen_index - 3] in calendar.month_name:
+                   first_vp_name = first_vp_data.split()[ : hyphen_index - 3]
+                   vp_name = ' '.join(first_vp_name)
+                   if vp_name == 'Office vacant':
+                       end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
+                       start_date = first_vp_data.split()[hyphen_index - 3: hyphen_index]
+                       start_date = ' '.join(start_date)
 
-                           new_data.append(vp_name)
-                           new_data.append(start_date)
-                           new_data.append(end_date)
-                       else:
-                           new_data.append(vp_name)
-
-
-
-                   elif first_vp_data.split()[ hyphen_index - 2] in calendar.month_name:
-                       first_vp_name = first_vp_data.split()[: hyphen_index - 2]
-                       vp_name = ' '.join(first_vp_name)
-                       if vp_name == 'Office vacant':
-
-                           end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
-                           start_date = first_vp_data.split()[hyphen_index - 2: hyphen_index]
-                           start_date.append(end_date.split()[2])
-                           start_date = ' '.join(start_date)
-                           #  if the year is missing because because they died or left in the same year then get the year from the end date
-
-                           new_data.append(vp_name)
-                           new_data.append(start_date)
-                           new_data.append(end_date)
-                       else:
-                           new_data.append(vp_name)
+                       new_data.append(vp_name)
+                       new_data.append(start_date)
+                       new_data.append(end_date)
+                   else:
+                       new_data.append(vp_name)
 
 
+               elif first_vp_data.split()[ hyphen_index - 2] in calendar.month_name:
+                   first_vp_name = first_vp_data.split()[: hyphen_index - 2]
+                   vp_name = ' '.join(first_vp_name)
+                   if vp_name == 'Office vacant':
+
+                       end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
+                       start_date = first_vp_data.split()[hyphen_index - 2: hyphen_index]
+                       start_date.append(end_date.split()[2])
+                       start_date = ' '.join(start_date)
+                       #  if the year is missing because because they died or left in the same year then get the year from the end date
+
+                       new_data.append(vp_name)
+                       new_data.append(start_date)
+                       new_data.append(end_date)
+                   else:
+                       new_data.append(vp_name)
 
 
-    #print('NEW DATA:  ', new_data)
     return new_data
 
 
