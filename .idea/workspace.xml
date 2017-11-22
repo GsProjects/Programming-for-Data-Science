@@ -25,8 +25,8 @@
       <file leaf-file-name="WebScraper.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CA 2/WebScraper.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="254">
-              <caret line="266" column="33" lean-forward="false" selection-start-line="266" selection-start-column="33" selection-end-line="266" selection-end-column="33" />
+            <state relative-caret-position="153">
+              <caret line="185" column="14" lean-forward="false" selection-start-line="185" selection-start-column="14" selection-end-line="185" selection-end-column="14" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -47,8 +47,8 @@
       <file leaf-file-name="Row.txt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CA 2/Row.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="245">
-              <caret line="49" column="0" lean-forward="false" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
+            <state relative-caret-position="117">
+              <caret line="83" column="65" lean-forward="false" selection-start-line="83" selection-start-column="59" selection-end-line="83" selection-end-column="65" />
               <folding />
             </state>
           </provider>
@@ -65,17 +65,12 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>zac</find>
-      <find>di</find>
-      <find>Zack</find>
-      <find>years</find>
       <find>gar</find>
       <find>john</find>
       <find>'John</find>
       <find>ty</find>
       <find>tyler</find>
       <find>tyl</find>
-      <find>data</find>
       <find>yur</find>
       <find>mart</find>
       <find>1881</find>
@@ -88,13 +83,18 @@
       <find>died</find>
       <find>FRANKLIN D</find>
       <find>of</find>
-      <find>spiro</find>
       <find>off</find>
       <find>5</find>
       <find>DATA 5</find>
       <find>DATA 6</find>
       <find>Data 7</find>
       <find>DATA I</find>
+      <find>spiro</find>
+      <find>john f.</find>
+      <find>john f</find>
+      <find>data</find>
+      <find>vp</find>
+      <find>resig</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -428,7 +428,7 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298193" sideWeight="0.49746192" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.40963855" sideWeight="0.11167513" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298193" sideWeight="0.2813633" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.40963855" sideWeight="0.88832486" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.40963855" sideWeight="0.88832486" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298193" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298193" sideWeight="0.49746192" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -647,16 +647,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CA 2/Row.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="245">
-          <caret line="49" column="0" lean-forward="false" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
+        <state relative-caret-position="117">
+          <caret line="83" column="65" lean-forward="false" selection-start-line="83" selection-start-column="59" selection-end-line="83" selection-end-column="65" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/CA 2/WebScraper.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="254">
-          <caret line="266" column="33" lean-forward="false" selection-start-line="266" selection-start-column="33" selection-end-line="266" selection-end-column="33" />
+        <state relative-caret-position="153">
+          <caret line="185" column="14" lean-forward="false" selection-start-line="185" selection-start-column="14" selection-end-line="185" selection-end-column="14" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

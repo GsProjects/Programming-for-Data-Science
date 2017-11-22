@@ -83,18 +83,18 @@ def separate_data(president_rows):
                     text = text.replace("\xa0",'')
                     parsed_row.append(text)
             if len(parsed_row) > 0:
-                if len(parsed_row) == 5:
+                '''if len(parsed_row) == 5:
                     file.write(str(parsed_row))
                     file.write('###################################################')
                     file.write(str(len(parsed_row)))
                     file.write('\n')
-                    file.close()
+                    file.close()'''
                 prep_data(parsed_row)
-                '''file.write(str(parsed_row))
+                file.write(str(parsed_row))
                 file.write('###################################################')
                 file.write(str(len(parsed_row)))
                 file.write('\n')
-                file.close()'''
+                file.close()
 
 
 def parse_td_data(data):
@@ -131,14 +131,7 @@ def parse_td_data(data):
 
 
 def prep_data(data):
-    parties = ['Whig','Unaffiliated','Democratic','National Union','Democratic- Republican','Federalist', 'Republican']
-    party = []
     information =[]
-    president_name= ''
-    president_age = ''
-    presidential_status =''
-    first_vp_data =''
-    status = ['(Died', '(Resigned','(Succeeded']
     print('')
     print('')
 
@@ -153,63 +146,44 @@ def prep_data(data):
         #  if they died in office
         presidency_info = presidency_information(presidency_dates)
 
-
-
-
         information.extend(presidency_info)
         information.extend(president_info) #  set to '' at top if nothing is found
         information.append(data[2]) #  appends the party name
 
-        #information.append(president_name)
-        #information.append(president_age)
-        #information.append(data[2])
         #  if they succeeded to presidency
-        first_vp_data = vp_info(data[3],presidency_info[0], presidency_info[1])
-        information.extend(first_vp_data)
-        #print(len(data))
-        '''if len(data) > 4:
-            vp_data = vp_info(data[4], presidency_info[0], presidency_info[1])
+        #first_vp_data = vp_info(data[3],presidency_info[0], presidency_info[1])
+        #information.extend(first_vp_data)
+
+        if len(data) <= 4:
+            vp_data = vp_info(data[3], presidency_info[0], presidency_info[1])
             information.extend(vp_data)
-            print('DATA 4: ', data[4])'''
+            #print(data)
+            #print(vp_data)
 
         if len(data) >= 5:
+            if len(data[4]) == 16:
+                data.remove(data[4])  # exception case where the term date is not caught
             vp_data = vp_info(data[4], presidency_info[0], presidency_info[1])
             information.extend(vp_data)
-            print('vp_data: ', vp_data)
-            print('DATA 5: ', data[4])
 
         if len(data) >= 6:
             vp_data = vp_info(data[5], presidency_info[0], presidency_info[1])
             information.extend(vp_data)
-            print('vp_data: ', vp_data)
-            print('DATA 6: ', data[5])
 
         if len(data) >= 7:
             vp_data = vp_info(data[6], presidency_info[0], presidency_info[1])
             information.extend(vp_data)
-            print('vp_data: ', vp_data)
-            print('DATA 7: ', data[6])
-
-
 
         #information.extend(first_vp_data)
-        print(information)
+        #print(information)
 
-
-    if len(data) > 4:
-        if len( data[4]) == 16:
-            data.remove(data[4]) #  exception case where the term date is not caught
-
-
-        #print('DATA 4   :',data[4])
-        if len(data) == 6: #  if they were associated with two parties use the last one
-            party = [items for items in data[5].split() if items in parties]
 
 
 def parse_president_info(data):
     president_info = []
     president_name = '' 
     new_data = []
+    print(data)
     for index, items in enumerate(data[1].split()):
         if items == '(Lived:' or items == 'years)' or items == 'years' or items == 'old)' or items == 'Born':
             items = ''
@@ -261,8 +235,13 @@ def vp_info(data, start_vacancy, end_vacancy):
         new_data.append(data)
         new_data.append(start_vacancy)
         new_data.append(end_vacancy)
-    elif len(data.split()) == 2: #  if theres only one vice president
+    elif len(data.split()) <= 4: #  if theres only one vice president, len of <=4 for people like George H. W. Bush
         new_data.append(data)
+    elif len(data.split()) >= 0 and '–' not in data.split(): #  if the vice president had one of the statuses after their name with no date
+        for items in status:
+            if items in data.split():
+                vp_name = ' '.join(data.split()[ :data.split().index(items)])
+                new_data.append(vp_name)
     elif data[:13] == 'Office vacant': #  if its vacant for the balance of a term
         new_data.append(data[:13])
     else:
@@ -307,16 +286,6 @@ def vp_info(data, start_vacancy, end_vacancy):
 
     #print('NEW DATA:  ', new_data)
     return new_data
-
-
-    # if its lenght is less than 20 return the vp name  DONE
-    # if it contains office vacant and nothing else give return a list consistin of vacant and the presidency dates -> adjust function header
-    # otherwise parse it and return the vp name
-
-
-
-
-
 
 
 result = get_html()
