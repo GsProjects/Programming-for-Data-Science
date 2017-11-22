@@ -83,12 +83,7 @@ def separate_data(president_rows):
                     text = text.replace("\xa0",'')
                     parsed_row.append(text)
             if len(parsed_row) > 0:
-                '''if len(parsed_row) == 5:
-                    file.write(str(parsed_row))
-                    file.write('###################################################')
-                    file.write(str(len(parsed_row)))
-                    file.write('\n')
-                    file.close()'''
+
                 prep_data(parsed_row)
                 file.write(str(parsed_row))
                 file.write('###################################################')
@@ -98,8 +93,6 @@ def separate_data(president_rows):
 
 
 def parse_td_data(data):
-    print('')
-    print('')
     print('')
 
     removal_values = [0,1,2,2]
@@ -152,28 +145,28 @@ def prep_data(data):
         # DO THIS:   special case where date accompanies the whig party for john tyler
         if len(data[2]) == 39:
             if data[2].split()[0] == 'Whig':
-                information.append(data[2].split()[0])
+                information.append({'Party': data[2].split()[0]})
         else:
-            information.append(data[2]) #  appends the party name
+            information.append({'Party':data[2]}) #  appends the party name
 
 
 
         if len(data) >= 4:
-            vp_data = vp_info(data[3], presidency_info[0], presidency_info[1])
+            vp_data = vp_info(data[3], presidency_info[0], presidency_info[1],information)
             information.extend(vp_data)
 
         if len(data) >= 5:
             if len(data[4]) == 16:
                 data.remove(data[4])  # exception case where the term date is not caught
-            vp_data = vp_info(data[4], presidency_info[0], presidency_info[1])
+            vp_data = vp_info(data[4], presidency_info[0], presidency_info[1],information)
             information.extend(vp_data)
 
         if len(data) >= 6:
-            vp_data = vp_info(data[5], presidency_info[0], presidency_info[1])
+            vp_data = vp_info(data[5], presidency_info[0], presidency_info[1],information)
             information.extend(vp_data)
 
         if len(data) >= 7:
-            vp_data = vp_info(data[6], presidency_info[0], presidency_info[1])
+            vp_data = vp_info(data[6], presidency_info[0], presidency_info[1],information)
             information.extend(vp_data)
 
 
@@ -206,9 +199,9 @@ def parse_president_info(data):
 
     president_age = president_info[-1]
 
-    new_data.append(president_name)
-    new_data.append(year_of_birth)
-    new_data.append(president_age)
+    new_data.append({'President Name':president_name})
+    new_data.append({'Year of Birth':year_of_birth})
+    new_data.append({'President Age':president_age})
     return new_data
 
 def presidency_information(presidency_dates):
@@ -222,34 +215,54 @@ def presidency_information(presidency_dates):
 
                 presidency_dates[1] = presidency_dates[1][ :presidency_dates[1].index(items)]  # get the date up until the status
 
-                new_data.append(presidency_dates[0])
-                new_data.append(presidency_dates[1])
-                new_data.append(presidential_status)
+                new_data.append({'Presidency Start':presidency_dates[0]})
+                new_data.append({'Presidency End':presidency_dates[1]})
+                new_data.append({'Status':presidential_status})
     if len(new_data) == 0:
-        new_data = presidency_dates
-        new_data.append('') # add an empty field to represent status...for easier insertion in db
+        #new_data = presidency_dates
+        new_data.append({'Presidency Start': presidency_dates[0]})
+        new_data.append({'Presidency End': presidency_dates[1]})
+        new_data.append({'Status':''}) # add an empty field to represent status...for easier insertion in db
+
     return new_data
 
 
 
-def vp_info(data, start_vacancy, end_vacancy):
+def vp_info(data, start_vacancy, end_vacancy,information):
 
     status = ['(Died', '(Resigned', '(Succeeded', '(Balance']
-    first_vp_data = ''
     new_data =[]
 
     first_vp_data = data
     if data == 'Office vacant': # if the vp is vacant for the entire presidency use presidency dates of vacancy dates
-        new_data.append(data)
-        new_data.append(start_vacancy)
-        new_data.append(end_vacancy)
+        new_data.append({'Vacant': data})
+        new_data.append({'Vacant Start': start_vacancy})
+        new_data.append({'Vacant End': end_vacancy})
+
     elif len(data.split()) <= 4: #  if theres only one vice president, len of <=4 for people like George H. W. Bush
-        new_data.append(data)
+        new_data.append({'Vice President Name': data})
     elif len(data.split()) >= 0 and '–' not in data.split(): #  if the vice president had one of the statuses after their name with no date
         for items in status:
             if items in data.split():
                 vp_name = ' '.join(data.split()[ :data.split().index(items)])
-                new_data.append(vp_name)
+
+                if vp_name == 'Office vacant':
+                    # if office vacant for balance get previous vp dates so adjust parameters
+                    previous_vp_data = information[-2:]
+                    keys =[]
+                    dates =[]
+                    for items in previous_vp_data:
+                        for key,value in items.items():
+                            keys.append(key)
+                            dates.append(value)
+
+                    if 'Vice President Start' == keys[0] and 'Vice President End' == keys[1]:
+                        new_data.append({'Vacant': vp_name})
+                        new_data.append({'Vacant Start': dates[0]})
+                        new_data.append({'Vacant End': dates[1]})
+                else:
+                    # JOHN TYLER
+                    new_data.append({'Vice President Name': vp_name})
 
     else:
         for elements in first_vp_data.split():
@@ -263,11 +276,19 @@ def vp_info(data, start_vacancy, end_vacancy):
                        start_date = first_vp_data.split()[hyphen_index - 3: hyphen_index]
                        start_date = ' '.join(start_date)
 
-                       new_data.append(vp_name)
-                       new_data.append(start_date)
-                       new_data.append(end_date)
+                       new_data.append({'Vacant': vp_name})
+                       new_data.append({'Vacant Start': start_date})
+                       new_data.append({'Vacant End': end_date})
+
                    else:
-                       new_data.append(vp_name)
+
+                       end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
+                       start_date = first_vp_data.split()[hyphen_index - 3: hyphen_index]
+                       start_date = ' '.join(start_date)
+
+                       new_data.append({'Vice President Name': vp_name})
+                       new_data.append({'Vice President Start': start_date})
+                       new_data.append({'Vice President End': end_date})
 
 
                elif first_vp_data.split()[ hyphen_index - 2] in calendar.month_name:
@@ -281,13 +302,19 @@ def vp_info(data, start_vacancy, end_vacancy):
                        start_date = ' '.join(start_date)
                        #  if the year is missing because because they died or left in the same year then get the year from the end date
 
-                       new_data.append(vp_name)
-                       new_data.append(start_date)
-                       new_data.append(end_date)
+                       new_data.append({'Vacant': vp_name})
+                       new_data.append({'Vacant Start': start_date})
+                       new_data.append({'Vacant End': end_date})
                    else:
-                       new_data.append(vp_name)
 
+                       end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
+                       start_date = first_vp_data.split()[hyphen_index - 2: hyphen_index]
+                       start_date.append(end_date.split()[2])
+                       start_date = ' '.join(start_date)
 
+                       new_data.append({'Vice President Name': vp_name})
+                       new_data.append({'Vice President Start': start_date})
+                       new_data.append({'Vice President End': end_date})
     return new_data
 
 
