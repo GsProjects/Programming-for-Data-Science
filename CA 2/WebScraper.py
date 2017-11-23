@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import calendar
 import mysql.connector
-from collections import Counter
+from datetime import datetime
 
 
 def get_html():
@@ -204,13 +204,21 @@ def presidency_information(presidency_dates):
 
                 presidency_dates[1] = presidency_dates[1][ :presidency_dates[1].index(items)]  # get the date up until the status
 
-                new_data.append({'Presidency_Start':presidency_dates[0]})
-                new_data.append({'Presidency_End':presidency_dates[1]})
+                print(type(presidency_dates[0].strip('')))
+                print(presidency_dates[0])
+                new_data.append({'Presidency_Start':datetime.strptime(presidency_dates[0].strip(' ').replace(',',''), '%B %d %Y')})
+                new_data.append({'Presidency_End':datetime.strptime(presidency_dates[1].strip(' ').replace(',',''), '%B %d %Y')})
                 new_data.append({'Status':presidential_status})
     if len(new_data) == 0:
-        new_data.append({'Presidency_Start': presidency_dates[0]})
-        new_data.append({'Presidency_End': presidency_dates[1]})
-        new_data.append({'Status':''})  # add an empty field to represent status...for easier insertion in db
+        if presidency_dates[1].strip(' ') == 'Incumbent':
+            new_data.append({'Presidency_Start': datetime.strptime(presidency_dates[0].strip(' ').replace(',', ''), '%B %d %Y')})
+            new_data.append({'Presidency_End': datetime.strptime(str(datetime.today().strftime('%B %d %Y')), '%B %d %Y' )})
+            new_data.append({'Status': ''})  # add an empty field to represent status...for easier insertion in db
+
+        else:
+            new_data.append({'Presidency_Start': datetime.strptime(presidency_dates[0].strip(' ').replace(',',''), '%B %d %Y')})
+            new_data.append({'Presidency_End': datetime.strptime(presidency_dates[1].strip(' ').replace(',',''), '%B %d %Y')})
+            new_data.append({'Status':''})
 
     return new_data
 
@@ -244,6 +252,8 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                             dates.append(value)
 
                     if 'Vice_President_Start' == keys[0] and 'Vice_President_End' == keys[1]:
+                        print(type(dates[0]))
+                        print(dates[0])
                         new_data.append({'Vacant': vp_name})
                         new_data.append({'Vacant_Start': dates[0]})
                         new_data.append({'Vacant_End': dates[1]})
@@ -266,8 +276,8 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                        start_date = ' '.join(start_date)
 
                        new_data.append({'Vacant': vp_name})
-                       new_data.append({'Vacant_Start': start_date})
-                       new_data.append({'Vacant_End': end_date})
+                       new_data.append({'Vacant_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y')})
+                       new_data.append({'Vacant_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y')})
 
                    else:
                        if vp_name != 'Unaffiliated':
@@ -276,8 +286,8 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                            start_date = ' '.join(start_date)
 
                            new_data.append({'Vice_President_Name': vp_name})
-                           new_data.append({'Vice_President_Start': start_date})
-                           new_data.append({'Vice_President_End': end_date})
+                           new_data.append({'Vice_President_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y')})
+                           new_data.append({'Vice_President_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y')})
 
 
                elif first_vp_data.split()[ hyphen_index - 2] in calendar.month_name:
@@ -293,8 +303,8 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                        #  if the year is missing because because they died or left in the same year then get the year from the end date
 
                        new_data.append({'Vacant': vp_name})
-                       new_data.append({'Vacant_Start': start_date})
-                       new_data.append({'Vacant_End': end_date})
+                       new_data.append({'Vacant_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y')})
+                       new_data.append({'Vacant_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y')})
 
                    else:
                        end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
@@ -303,8 +313,8 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                        start_date = ' '.join(start_date)
 
                        new_data.append({'Vice_President_Name': vp_name})
-                       new_data.append({'Vice_President_Start': start_date})
-                       new_data.append({'Vice_President_End': end_date})
+                       new_data.append({'Vice_President_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y')})
+                       new_data.append({'Vice_President_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y')})
     return new_data
 
 
@@ -411,69 +421,17 @@ def insert_data(president_data, name):
     print('INSERT STATEMENT: ', insert_statement)
     print(' ')
 
-'''def insert_vp_data(table_data, table_name_2):
-    numbers = range(0,5)
-    occurrences = []
-    new_data =[]
-    print('TABLE DATA: ', table_data)
-    for dictionaries in table_data:
-        for key, value in dictionaries.items():
-            occurrences.append(key)
-
-    num = 1
-    num1 = 1
-    for index,dictionaries in enumerate(table_data):
-        dictionary = table_data[index]
-        for key, value in dictionary.items():
-            if key != 'President_Name':
-                if occurrences.count(key) > 1:
-                    if key == 'Vice_President_Name':
-
-                        key += str(num)
-                        new_data.append({key:value})
-
-                        date1 = table_data[index + 1]
-                        for key1,value1 in date1.items():
-                            key1 += str(num)
-                            new_data.append({key1: value1})
-
-                        date2 = table_data[index + 2]
-                        for key2, value2 in date2.items():
-                            key2 += str(num)
-                            new_data.append({key2: value2})
-
-                        index += 3
-                        num += 1
-                    elif key == 'Vacant':
-                        key += str(num1)
-                        new_data.append({key: value})
-
-                        date1 = table_data[index + 1]
-                        for key1, value1 in date1.items():
-                            key1 += str(num1)
-                            new_data.append({key1: value1})
-
-                        date2 = table_data[index + 2]
-                        for key2, value2 in date2.items():
-                            key2 += str(num1)
-                            new_data.append({key2: value2})
-
-                        index += 3
-                        num1 += 1
-
-                else: # if theres only 1 vice president append number 1 to end
-                    key = key + '1'
-                    new_data.append({key:value})
-            else:
-                new_data.append({key: value})
-    with open('NEW.TXT', 'a') as file:
-        file.write(str(new_data))
-        file.write('\n')
-        file.write('\n')
-    #print('DATA: ', table_data)
-    insert_data(new_data, table_name_2)'''
+    perform_insert(insert_statement, column_data)
 
 
+def perform_insert(statement, column_data):
+    conn = create_connection()
+    cursor = conn.cursor()
+    query =(statement)
+    cursor.execute(query, [items for items in column_data])
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 
 
