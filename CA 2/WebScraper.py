@@ -159,11 +159,6 @@ def prep_data(data):
             vp_data = vp_info(data[6], presidency_info[0], presidency_info[1],information)
             information.extend(vp_data)
 
-        with open('Info.txt','a') as file:
-            file.write(str(information))
-            file.write(' ')
-            file.write(' ')
-        file.close()
         prepare_insert(information)
 
 
@@ -237,6 +232,7 @@ def vp_info(data, start_vacancy, end_vacancy,information):
             if items in data.split():
                 vp_name = ' '.join(data.split()[ :data.split().index(items)])
 
+                #print('VP NAME: ', vp_name)
                 if vp_name == 'Office vacant':
                     # if office vacant for balance get previous vp dates so adjust parameters
                     previous_vp_data = information[-2:]
@@ -247,7 +243,7 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                             keys.append(key)
                             dates.append(value)
 
-                    if 'Vice President Start' == keys[0] and 'Vice President End' == keys[1]:
+                    if 'Vice_President_Start' == keys[0] and 'Vice_President_End' == keys[1]:
                         new_data.append({'Vacant': vp_name})
                         new_data.append({'Vacant_Start': dates[0]})
                         new_data.append({'Vacant_End': dates[1]})
@@ -262,6 +258,7 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                if first_vp_data.split()[ hyphen_index - 3] in calendar.month_name:
                    first_vp_name = first_vp_data.split()[ : hyphen_index - 3]
                    vp_name = ' '.join(first_vp_name)
+                   #print('VP NAME: ', vp_name)
 
                    if vp_name == 'Office vacant':
                        end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
@@ -286,6 +283,7 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                elif first_vp_data.split()[ hyphen_index - 2] in calendar.month_name:
                    first_vp_name = first_vp_data.split()[: hyphen_index - 2]
                    vp_name = ' '.join(first_vp_name)
+                   #print('VP NAME: ', vp_name)
 
                    if vp_name == 'Office vacant':
                        end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
@@ -356,7 +354,7 @@ def insert_data(president_data, name):
     insert_statement += ', '.join(column_names)
     insert_statement += ')'
     insert_statement += ' values ' + values
-    #print('INSERT STATEMENT: ', insert_statement)
+    print('INSERT STATEMENT: ', insert_statement)
 
 def insert_vp_data(table_data, table_name_2):
     numbers = range(0,5)
@@ -368,50 +366,58 @@ def insert_vp_data(table_data, table_name_2):
             occurrences.append(key)
 
     num = 1
+    num1 = 1
     for index,dictionaries in enumerate(table_data):
         dictionary = table_data[index]
         for key, value in dictionary.items():
             if key != 'President_Name':
                 if occurrences.count(key) > 1:
-                    if key == 'Vice_President_Name' or key == 'Vacant':
-                    #print('KEY : ', key)
-
-                        #for key1, value in dictionaries.items(): #  enumerate so you can set the associated dates to same num
+                    if key == 'Vice_President_Name':
 
                         key += str(num)
-                        #print('key: ', key)
                         new_data.append({key:value})
+
                         date1 = table_data[index + 1]
-                        #print('date1: ', date1)
                         for key1,value1 in date1.items():
                             key1 += str(num)
                             new_data.append({key1: value1})
-                            #print(key1, ' ', value1)
+
                         date2 = table_data[index + 2]
-                        #print('date2: ', date2)
-                        #print(index)
-                        #pass
                         for key2, value2 in date2.items():
                             key2 += str(num)
                             new_data.append({key2: value2})
-                            #print(key2,' ', value2)
 
                         index += 3
                         num += 1
-                else:
+                    elif key == 'Vacant':
+                        key += str(num1)
+                        new_data.append({key: value})
+
+                        date1 = table_data[index + 1]
+                        for key1, value1 in date1.items():
+                            key1 += str(num1)
+                            new_data.append({key1: value1})
+
+                        date2 = table_data[index + 2]
+                        for key2, value2 in date2.items():
+                            key2 += str(num1)
+                            new_data.append({key2: value2})
+
+                        index += 3
+                        num1 += 1
+
+                else: # if theres only 1 vice president append number 1 to end
+                    key = key + '1'
                     new_data.append({key:value})
             else:
                 new_data.append({key: value})
+    with open('NEW.TXT', 'a') as file:
+        file.write(str(new_data))
+        file.write('\n')
+        file.write('\n')
+    #print('DATA: ', table_data)
+    insert_data(new_data, table_name_2)
 
-
-
-    print('NEW DATA: ', new_data)
-
-#if first key matches
-
-
-#  NEED TO ADD A NUMBER TO THE END OF ALL Vacant and vice president data
-#  Count the occurrence of a key in a list of dictionaries
 
 
 
