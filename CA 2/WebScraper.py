@@ -329,9 +329,63 @@ def prepare_insert(information):
 
 
     table_name_1 = 'Presidents'
-    table_name_2 = 'Vice_Presidents'
+    table_name_2 = 'Vice_President'
+    table_name_3 = 'Vacant'
+    data =[]
+    #print('Vice: ',  vice_president_table)
     insert_data(president_table,table_name_1)
-    insert_vp_data(vice_president_table, table_name_2)
+    if len(vice_president_table) > 2:
+        if len(vice_president_table) == 4: # send the data as is to the vacant table
+            #print(vice_president_table)
+            insert_data(vice_president_table, table_name_3)
+        elif len(vice_president_table) > 4:
+            new_index = 0
+            for index,dictionaries in enumerate(vice_president_table):
+                #print('INDEX: ', new_index)
+                for key, value in vice_president_table[new_index].items():
+                    #print('KEY: ', key)
+                    if 'Vice_President' in key:
+                        #print('KEY1 ', key)
+                        start = vice_president_table[new_index + 1]
+                        end = vice_president_table[new_index + 2]
+                        data.append({key:value})
+                        data.append(start)
+                        data.append(end)
+                        data.append(vice_president_table[-1])
+                        #print('Vice DATA: ', data)
+                        new_index = new_index +  3
+                        #print('INNER INDEX1  ', new_index)
+
+                        # INSERT INTO VP
+                        insert_data(data, table_name_2)
+                        data = []
+
+                    if 'Vacant' in key:
+                        #print('KEY2 ', key)
+                        start = vice_president_table[new_index + 1]
+                        end = vice_president_table[new_index + 2]
+                        data.append({key: value})
+                        data.append(start)
+                        data.append(end)
+                        data.append(vice_president_table[-1])
+                        #print('VACANT DATA: ', data)
+
+                        new_index = new_index + 3
+                        #print('INNER INDEX2  ', new_index)
+
+                        # INSERT INTO VACANT
+                        insert_data(data, table_name_3)
+                        data = []
+
+
+    else:
+        # INSERT INTO VICE PRESIDENT TABLE
+        insert_data(vice_president_table, table_name_2)
+
+
+
+        #print(len(vice_president_table))
+    #insert_vp_data(vice_president_table, table_name_2)
 
 
 def insert_data(president_data, name):
@@ -355,8 +409,9 @@ def insert_data(president_data, name):
     insert_statement += ')'
     insert_statement += ' values ' + values
     print('INSERT STATEMENT: ', insert_statement)
+    print(' ')
 
-def insert_vp_data(table_data, table_name_2):
+'''def insert_vp_data(table_data, table_name_2):
     numbers = range(0,5)
     occurrences = []
     new_data =[]
@@ -416,7 +471,7 @@ def insert_vp_data(table_data, table_name_2):
         file.write('\n')
         file.write('\n')
     #print('DATA: ', table_data)
-    insert_data(new_data, table_name_2)
+    insert_data(new_data, table_name_2)'''
 
 
 
@@ -435,3 +490,5 @@ parse_html(data)
 
 
 #  create table Presidents (Presidency_Start Date, Presidency_End Date, Status varchar(50), President_Name varchar(50), Year_of_Birth int(11), President_Age int(11), Party varchar(50));
+#  create table Vice_President (Vice_President_Name varchar(50), Vice_President_Start Date, Vice_President_End Date, President_Name varchar(50));
+#  create table Vacant (Vacant varchar(50), Vacant_Start Date, Vacant_End Date, President_Name varchar(50));
