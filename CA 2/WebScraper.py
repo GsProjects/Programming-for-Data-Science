@@ -85,7 +85,6 @@ def separate_data(president_rows):
 
 
 def parse_td_data(data):
-    print('')
 
     removal_values = [0,1,2,2]
     if len(data) > 8 :
@@ -117,8 +116,6 @@ def parse_td_data(data):
 
 def prep_data(data):
     information =[]
-    print('')
-    print('')
 
     #  split the presidency dates
     presidency_dates = data[0].split('–')  # possible encoding error with the hyphen as the mac hyphen will not work in the split function
@@ -204,20 +201,18 @@ def presidency_information(presidency_dates):
 
                 presidency_dates[1] = presidency_dates[1][ :presidency_dates[1].index(items)]  # get the date up until the status
 
-                print(type(presidency_dates[0].strip('')))
-                print(presidency_dates[0])
-                new_data.append({'Presidency_Start':datetime.strptime(presidency_dates[0].strip(' ').replace(',',''), '%B %d %Y')})
-                new_data.append({'Presidency_End':datetime.strptime(presidency_dates[1].strip(' ').replace(',',''), '%B %d %Y')})
+                new_data.append({'Presidency_Start': datetime.strptime(presidency_dates[0].strip(' ').replace(',',''), '%B %d %Y').date()})
+                new_data.append({'Presidency_End': datetime.strptime(presidency_dates[1].strip(' ').replace(',',''), '%B %d %Y').date()})
                 new_data.append({'Status':presidential_status})
     if len(new_data) == 0:
         if presidency_dates[1].strip(' ') == 'Incumbent':
-            new_data.append({'Presidency_Start': datetime.strptime(presidency_dates[0].strip(' ').replace(',', ''), '%B %d %Y')})
-            new_data.append({'Presidency_End': datetime.strptime(str(datetime.today().strftime('%B %d %Y')), '%B %d %Y' )})
+            new_data.append({'Presidency_Start': datetime.strptime(presidency_dates[0].strip(' ').replace(',', ''), '%B %d %Y').date()})
+            new_data.append({'Presidency_End': datetime.strptime(str(datetime.today().strftime('%B %d %Y')), '%B %d %Y' ).date()})
             new_data.append({'Status': ''})  # add an empty field to represent status...for easier insertion in db
 
         else:
-            new_data.append({'Presidency_Start': datetime.strptime(presidency_dates[0].strip(' ').replace(',',''), '%B %d %Y')})
-            new_data.append({'Presidency_End': datetime.strptime(presidency_dates[1].strip(' ').replace(',',''), '%B %d %Y')})
+            new_data.append({'Presidency_Start': datetime.strptime(presidency_dates[0].strip(' ').replace(',',''), '%B %d %Y').date()})
+            new_data.append({'Presidency_End': datetime.strptime(presidency_dates[1].strip(' ').replace(',',''), '%B %d %Y').date()})
             new_data.append({'Status':''})
 
     return new_data
@@ -240,7 +235,6 @@ def vp_info(data, start_vacancy, end_vacancy,information):
             if items in data.split():
                 vp_name = ' '.join(data.split()[ :data.split().index(items)])
 
-                #print('VP NAME: ', vp_name)
                 if vp_name == 'Office vacant':
                     # if office vacant for balance get previous vp dates so adjust parameters
                     previous_vp_data = information[-2:]
@@ -252,8 +246,6 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                             dates.append(value)
 
                     if 'Vice_President_Start' == keys[0] and 'Vice_President_End' == keys[1]:
-                        print(type(dates[0]))
-                        print(dates[0])
                         new_data.append({'Vacant': vp_name})
                         new_data.append({'Vacant_Start': dates[0]})
                         new_data.append({'Vacant_End': dates[1]})
@@ -268,7 +260,6 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                if first_vp_data.split()[ hyphen_index - 3] in calendar.month_name:
                    first_vp_name = first_vp_data.split()[ : hyphen_index - 3]
                    vp_name = ' '.join(first_vp_name)
-                   #print('VP NAME: ', vp_name)
 
                    if vp_name == 'Office vacant':
                        end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
@@ -276,8 +267,8 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                        start_date = ' '.join(start_date)
 
                        new_data.append({'Vacant': vp_name})
-                       new_data.append({'Vacant_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y')})
-                       new_data.append({'Vacant_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y')})
+                       new_data.append({'Vacant_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y').date()})
+                       new_data.append({'Vacant_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y').date()})
 
                    else:
                        if vp_name != 'Unaffiliated':
@@ -286,14 +277,13 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                            start_date = ' '.join(start_date)
 
                            new_data.append({'Vice_President_Name': vp_name})
-                           new_data.append({'Vice_President_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y')})
-                           new_data.append({'Vice_President_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y')})
+                           new_data.append({'Vice_President_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y').date()})
+                           new_data.append({'Vice_President_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y').date()})
 
 
                elif first_vp_data.split()[ hyphen_index - 2] in calendar.month_name:
                    first_vp_name = first_vp_data.split()[: hyphen_index - 2]
                    vp_name = ' '.join(first_vp_name)
-                   #print('VP NAME: ', vp_name)
 
                    if vp_name == 'Office vacant':
                        end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
@@ -303,8 +293,8 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                        #  if the year is missing because because they died or left in the same year then get the year from the end date
 
                        new_data.append({'Vacant': vp_name})
-                       new_data.append({'Vacant_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y')})
-                       new_data.append({'Vacant_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y')})
+                       new_data.append({'Vacant_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y').date()})
+                       new_data.append({'Vacant_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y').date()})
 
                    else:
                        end_date = ' '.join(first_vp_data.split()[hyphen_index + 1: hyphen_index + 4])
@@ -313,8 +303,8 @@ def vp_info(data, start_vacancy, end_vacancy,information):
                        start_date = ' '.join(start_date)
 
                        new_data.append({'Vice_President_Name': vp_name})
-                       new_data.append({'Vice_President_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y')})
-                       new_data.append({'Vice_President_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y')})
+                       new_data.append({'Vice_President_Start': datetime.strptime(start_date.strip(' ').replace(',',''), '%B %d %Y').date()})
+                       new_data.append({'Vice_President_End': datetime.strptime(end_date.strip(' ').replace(',',''), '%B %d %Y').date()})
     return new_data
 
 
@@ -334,56 +324,42 @@ def prepare_insert(information):
     if(len(vice_president_table) > 0 ):  # add the president to all the vice president info
         vice_president_table.append(information[3])
 
-    #print('vice_president_table ', vice_president_table)
-    #print('president_table ', president_table)
 
 
     table_name_1 = 'Presidents'
     table_name_2 = 'Vice_President'
     table_name_3 = 'Vacant'
     data =[]
-    #print('Vice: ',  vice_president_table)
     insert_data(president_table,table_name_1)
     if len(vice_president_table) > 2:
         if len(vice_president_table) == 4: # send the data as is to the vacant table
-            #print(vice_president_table)
             insert_data(vice_president_table, table_name_3)
         elif len(vice_president_table) > 4:
             new_index = 0
             for index,dictionaries in enumerate(vice_president_table):
-                #print('INDEX: ', new_index)
                 for key, value in vice_president_table[new_index].items():
-                    #print('KEY: ', key)
                     if 'Vice_President' in key:
-                        #print('KEY1 ', key)
                         start = vice_president_table[new_index + 1]
                         end = vice_president_table[new_index + 2]
                         data.append({key:value})
                         data.append(start)
                         data.append(end)
                         data.append(vice_president_table[-1])
-                        #print('Vice DATA: ', data)
                         new_index = new_index +  3
-                        #print('INNER INDEX1  ', new_index)
 
-                        # INSERT INTO VP
                         insert_data(data, table_name_2)
                         data = []
 
                     if 'Vacant' in key:
-                        #print('KEY2 ', key)
                         start = vice_president_table[new_index + 1]
                         end = vice_president_table[new_index + 2]
                         data.append({key: value})
                         data.append(start)
                         data.append(end)
                         data.append(vice_president_table[-1])
-                        #print('VACANT DATA: ', data)
 
                         new_index = new_index + 3
-                        #print('INNER INDEX2  ', new_index)
 
-                        # INSERT INTO VACANT
                         insert_data(data, table_name_3)
                         data = []
 
@@ -391,11 +367,6 @@ def prepare_insert(information):
     else:
         # INSERT INTO VICE PRESIDENT TABLE
         insert_data(vice_president_table, table_name_2)
-
-
-
-        #print(len(vice_president_table))
-    #insert_vp_data(vice_president_table, table_name_2)
 
 
 def insert_data(president_data, name):
@@ -418,8 +389,6 @@ def insert_data(president_data, name):
     insert_statement += ', '.join(column_names)
     insert_statement += ')'
     insert_statement += ' values ' + values
-    print('INSERT STATEMENT: ', insert_statement)
-    print(' ')
 
     perform_insert(insert_statement, column_data)
 
@@ -434,6 +403,165 @@ def perform_insert(statement, column_data):
     conn.close()
 
 
+def get_extra_data():
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('Select President_Name from Presidents;')
+    cursor.execute(query, )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    url = 'https://en.m.wikipedia.org/wiki/'
+    num = 0
+    for items in result:
+        num+=1
+        items[0].strip(' ')
+        new_url = url + items[0].replace(' ','_')
+
+        html_content = urlopen(new_url)
+        content = BeautifulSoup(html_content, "lxml")
+        html_content.close()
+        tables = content.find_all('table', {'class': 'infobox vcard'})
+
+        info = []
+        info_table = tables[0].find_all('tr')
+
+        for index,rows in enumerate(info_table):
+            row = info_table[index]
+            if row.th:
+
+                if row.th.get_text() == 'Born':
+                    info.append(row)
+
+                    if  info_table[index + 1].th.get_text() == 'Died':
+                        info.append(info_table[index + 1])
+                        index +=2
+
+        parse_new_data(info, items[0])
+
+
+def parse_new_data(data, president_name):
+
+    info = []
+    if len(data) == 2:
+        born = data[0].find_all('span',{'class':'bday'})
+        birth_date = datetime.strptime(born[0].get_text(), '%Y-%m-%d').date()
+        death = data[1].find_all('span', {'class': 'dday deathdate'})
+        death_date = datetime.strptime(death[0].get_text(), '%Y-%m-%d').date()
+        print('ORIGINAL: ', data[0].get_text().split())
+
+
+        if data[0].get_text().split()[-1] == 'U.S.' or data[0].get_text().split()[-1] == 'U.S.)' or data[0].get_text().split()[-1] == 'U.S.),':
+            state = data[0].get_text().split()[-2]
+            if state.replace(',','') == 'Carolina':
+                state = data[0].get_text().split()[-3] + ' Carolina'
+                print('DATA8: ', data[0].get_text().split())
+                print(' ')
+            if state == 'Massachusetts,':
+                state = 'Massachusetts'
+            if state == 'D.C.,':
+                state = 'Washington'
+            elif state == 'York,':
+                state = 'New York'
+            elif state.replace(',','') == 'Jersey':
+                state = 'New Jersey'
+            elif state == 'Hampshire':
+                state = 'New Hampshire'
+            elif state == 'America':
+
+                if data[0].get_text().split()[-3].replace(',','') == 'Carolina':
+                    print('DATA3: ', data[0].get_text().split())
+                    print(' ')
+                    state = 'Carolina'
+                else:
+                    state = 'Virginia'
+            else:
+                state = state.replace(',','')
+        else:
+            state = data[0].get_text().split()[-1]
+            if state.replace(',', '') == 'Carolina':
+                state = data[0].get_text().split()[-2] + ' Carolina'
+
+            if state == 'Massachusetts,':
+                state = 'Massachusetts'
+            if state == 'D.C.,':
+                state = 'Washington'
+            elif state == 'York,':
+                state = 'New York'
+            elif state == 'Jersey':
+                state = 'New Jersey'
+            elif state == 'Hampshire':
+                state = 'New Hampshire'
+            elif state == 'America':
+
+                if data[0].get_text().split()[-3].replace(',','') == 'Carolina':
+                    print('DATA4: ', data[0].get_text().split())
+                    print(' ')
+                    state =data[0].get_text().split()[-4] +' Carolina'
+                else:
+                    state = 'Virginia'
+            else:
+                state = state.replace(',', '')
+                print('DATA6: ', data[0].get_text().split())
+                print(' ')
+        info.append(birth_date)
+        info.append(death_date)
+        info.append(state)
+        info.append(president_name.strip(' '))
+        insert_new_data(info)
+
+
+    elif len(data) == 1:
+        born = data[0].find_all('span', {'class': 'bday'})
+        birth_date = datetime.strptime(born[0].get_text(), '%Y-%m-%d').date()
+        print('DATA: ', data[0].get_text().split())
+
+
+        if data[0].get_text().split()[-1] == 'City':
+            state = 'New York'
+        if data[0].get_text().split()[-1] == 'U.S.':
+            state = data[0].get_text().split()[-2]
+            state = state.replace(',','')
+        if state == 'Carolina':
+            print('DATA9: ', data[0].get_text().split())
+            print(' ')
+        if data[0].get_text().split()[-3].replace(',','') == 'Carolina':
+            print('DATA5: ', data[0].get_text().split())
+            print(' ')
+            state = 'Carolina'
+
+
+    info.append(birth_date)
+    info.append(state)
+    info.append(president_name.strip(' '))
+    insert_new_data(info)
+
+
+def insert_new_data(info):
+    print(info)
+    if len(info) == 4:
+        conn = create_connection()
+        cursor = conn.cursor()
+        query = ('Update Presidents set President_Birth=%s, President_Death=%s, State=%s where President_Name = %s;')
+        cursor.execute(query, [item for item in info] )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print('DONE INSERT 1')
+    elif len(info) == 3:
+        conn = create_connection()
+        cursor = conn.cursor()
+        query = (
+        'Update Presidents set President_Birth=%s, State=%s where President_Name = %s;')
+        cursor.execute(query, [item for item in info])
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print('DONE INSERT 2')
+
+
+
 
 
 def create_connection():
@@ -442,11 +570,109 @@ def create_connection():
                                    database='Web_Data')
     return cnx2
 
-result = get_html()
-data = remove_tags(result)
-parse_html(data)
+def question_1():
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('Select President_Name, DATE(Presidency_End) from Presidents where Status = "Died";')
+    cursor.execute(query, )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    print('The number of presidents that died in office is: ', len(result), '. They are \n')
+    [print(item) for item in result]
+    print('')
 
 
-#  create table Presidents (Presidency_Start Date, Presidency_End Date, Status varchar(50), President_Name varchar(50), Year_of_Birth int(11), President_Age int(11), Party varchar(50));
+def question_2():
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('Select President_Name, DATE(Presidency_End) from Presidents where Status = "Resigned";')
+    cursor.execute(query, )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    print('The number of presidents that resigned in office is: ', len(result), '. They are \n')
+    [print(item) for item in result]
+    print('')
+
+
+def question_3():
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('Select President_Name as Presidents_Who_Were_Vice_Presidents from Presidents where President_Name IN (select Vice_President_Name from Vice_President);')
+
+    cursor.execute(query, )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    for items in result:
+        print(items[0], ' was a a president and vice president\n')
+        conn = create_connection()
+        cursor = conn.cursor()
+        query = ('Select President_Name as President_To from Vice_President where Vice_President_Name = %s;')
+        cursor.execute(query, items)
+        result = cursor.fetchone()
+        print(items[0] ,' was vice president to: ', result[0])
+        print(' ')
+        cursor.close()
+        conn.close()
+
+
+def question_4():
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('select (sum(TIMESTAMPDIFF(month,Vacant_Start,Vacant_End))-mod(sum(TIMESTAMPDIFF(month,Vacant_Start,Vacant_End)),12))/12 as years, mod(sum(TIMESTAMPDIFF(month,Vacant_Start,Vacant_End)),12) as months  from Vacant;')
+    cursor.execute(query, )
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    print('The Vice President Office has been vacant for: ', result[0], ' years and: ', result[1], ' Months')
+    print('')
+
+
+def question_5():
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('Select President_Name,President_Age,Presidency_Start from Presidents where President_Age = (Select min(President_Age) from Presidents);')
+    cursor.execute(query, )
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    print('The youngest serving President was : \n')
+    print(result)
+    print('')
+
+
+def question_7():
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('select President_Name, max(DATEDIFF(Presidency_End, Presidency_Start)) as Length_Of_Term from Presidents where DATEDIFF(Presidency_Start, Presidency_End) = (select max(DATEDIFF(Presidency_Start, Presidency_End)) from Presidents) Group by President_Name;')
+    cursor.execute(query, )
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    print('The Presidential Term in days was : ', result[0], ' served by: ', result[1])
+    print(result)
+    print('')
+
+
+
+#result = get_html()
+#data = remove_tags(result)
+#parse_html(data)
+get_extra_data()
+#alter_President_table()
+#question_1()
+#question_2()
+#question_3()
+#question_4()
+#question_5()
+#question_6()
+#question_7()
+
+
+
+
+#  create table Presidents (Presidency_Start Date, Presidency_End Date, Status varchar(50), President_Name varchar(50), Year_of_Birth int(11), President_Age int(11), Party varchar(50),President_Birth Date, President_Death Date, State varchar(50));
 #  create table Vice_President (Vice_President_Name varchar(50), Vice_President_Start Date, Vice_President_End Date, President_Name varchar(50));
 #  create table Vacant (Vacant varchar(50), Vacant_Start Date, Vacant_End Date, President_Name varchar(50));
