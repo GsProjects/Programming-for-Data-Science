@@ -403,6 +403,36 @@ def perform_insert(statement, column_data):
     conn.close()
 
 
+def get_states():
+    url = 'https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States#States'
+    html_content = urlopen(url)
+    content = BeautifulSoup(html_content, "lxml")
+    html_content.close()
+    tables = content.find_all('table')
+
+
+    table_rows = tables[0].find_all('tr')
+    states = []
+    for row in table_rows:
+        if row.th:
+            state = row.th.get_text()
+            if '[' in state:
+                index = state.index('[')
+                state = state[:index]
+                states.append(state.strip(' '))
+            else:
+                states.append(state.strip(' '))
+
+    states.remove(states[0])
+    states.remove(states[0])
+    return states
+
+
+
+
+
+
+
 def get_extra_data():
     conn = create_connection()
     cursor = conn.cursor()
@@ -422,6 +452,7 @@ def get_extra_data():
         html_content = urlopen(new_url)
         content = BeautifulSoup(html_content, "lxml")
         html_content.close()
+
         tables = content.find_all('table', {'class': 'infobox vcard'})
 
         info = []
@@ -449,15 +480,12 @@ def parse_new_data(data, president_name):
         birth_date = datetime.strptime(born[0].get_text(), '%Y-%m-%d').date()
         death = data[1].find_all('span', {'class': 'dday deathdate'})
         death_date = datetime.strptime(death[0].get_text(), '%Y-%m-%d').date()
-        print('ORIGINAL: ', data[0].get_text().split())
-
 
         if data[0].get_text().split()[-1] == 'U.S.' or data[0].get_text().split()[-1] == 'U.S.)' or data[0].get_text().split()[-1] == 'U.S.),':
             state = data[0].get_text().split()[-2]
             if state.replace(',','') == 'Carolina':
                 state = data[0].get_text().split()[-3] + ' Carolina'
-                print('DATA8: ', data[0].get_text().split())
-                print(' ')
+
             if state == 'Massachusetts,':
                 state = 'Massachusetts'
             if state == 'D.C.,':
@@ -471,8 +499,6 @@ def parse_new_data(data, president_name):
             elif state == 'America':
 
                 if data[0].get_text().split()[-3].replace(',','') == 'Carolina':
-                    print('DATA3: ', data[0].get_text().split())
-                    print(' ')
                     state = 'Carolina'
                 else:
                     state = 'Virginia'
@@ -496,15 +522,12 @@ def parse_new_data(data, president_name):
             elif state == 'America':
 
                 if data[0].get_text().split()[-3].replace(',','') == 'Carolina':
-                    print('DATA4: ', data[0].get_text().split())
-                    print(' ')
                     state =data[0].get_text().split()[-4] +' Carolina'
                 else:
                     state = 'Virginia'
             else:
                 state = state.replace(',', '')
-                print('DATA6: ', data[0].get_text().split())
-                print(' ')
+
         info.append(birth_date)
         info.append(death_date)
         info.append(state)
@@ -515,20 +538,13 @@ def parse_new_data(data, president_name):
     elif len(data) == 1:
         born = data[0].find_all('span', {'class': 'bday'})
         birth_date = datetime.strptime(born[0].get_text(), '%Y-%m-%d').date()
-        print('DATA: ', data[0].get_text().split())
-
 
         if data[0].get_text().split()[-1] == 'City':
             state = 'New York'
         if data[0].get_text().split()[-1] == 'U.S.':
             state = data[0].get_text().split()[-2]
             state = state.replace(',','')
-        if state == 'Carolina':
-            print('DATA9: ', data[0].get_text().split())
-            print(' ')
         if data[0].get_text().split()[-3].replace(',','') == 'Carolina':
-            print('DATA5: ', data[0].get_text().split())
-            print(' ')
             state = 'Carolina'
 
 
@@ -539,7 +555,6 @@ def parse_new_data(data, president_name):
 
 
 def insert_new_data(info):
-    print(info)
     if len(info) == 4:
         conn = create_connection()
         cursor = conn.cursor()
@@ -548,7 +563,6 @@ def insert_new_data(info):
         conn.commit()
         cursor.close()
         conn.close()
-        print('DONE INSERT 1')
     elif len(info) == 3:
         conn = create_connection()
         cursor = conn.cursor()
@@ -558,10 +572,6 @@ def insert_new_data(info):
         conn.commit()
         cursor.close()
         conn.close()
-        print('DONE INSERT 2')
-
-
-
 
 
 def create_connection():
@@ -571,6 +581,8 @@ def create_connection():
     return cnx2
 
 def question_1():
+    print('QUESTION 1')
+    print(' ')
     conn = create_connection()
     cursor = conn.cursor()
     query = ('Select President_Name, DATE(Presidency_End) from Presidents where Status = "Died";')
@@ -579,24 +591,30 @@ def question_1():
     cursor.close()
     conn.close()
     print('The number of presidents that died in office is: ', len(result), '. They are \n')
-    [print(item) for item in result]
+    [print(item[0], ' : ', item[1].strftime('%B %d %Y')) for item in result]
     print('')
+    print('#####################################################################')
 
 
 def question_2():
+    print('QUESTION 2')
+    print(' ')
     conn = create_connection()
     cursor = conn.cursor()
-    query = ('Select President_Name, DATE(Presidency_End) from Presidents where Status = "Resigned";')
+    query = ('Select President_Name, Presidency_End from Presidents where Status = "Resigned";')
     cursor.execute(query, )
     result = cursor.fetchall()
     cursor.close()
     conn.close()
     print('The number of presidents that resigned in office is: ', len(result), '. They are \n')
-    [print(item) for item in result]
-    print('')
+    for item in result:
+        print(item[0], ' : ', item[1].strftime('%B %d %Y'))
+    print('#####################################################################')
 
 
 def question_3():
+    print('QUESTION 3')
+    print(' ')
     conn = create_connection()
     cursor = conn.cursor()
     query = ('Select President_Name as Presidents_Who_Were_Vice_Presidents from Presidents where President_Name IN (select Vice_President_Name from Vice_President);')
@@ -606,19 +624,21 @@ def question_3():
     cursor.close()
     conn.close()
     for items in result:
-        print(items[0], ' was a a president and vice president\n')
         conn = create_connection()
         cursor = conn.cursor()
         query = ('Select President_Name as President_To from Vice_President where Vice_President_Name = %s;')
         cursor.execute(query, items)
         result = cursor.fetchone()
-        print(items[0] ,' was vice president to: ', result[0])
+        print(items[0] ,' was a president and also vice president to: ', result[0])
         print(' ')
         cursor.close()
         conn.close()
+    print('#####################################################################')
 
 
 def question_4():
+    print('QUESTION 4')
+    print(' ')
     conn = create_connection()
     cursor = conn.cursor()
     query = ('select (sum(TIMESTAMPDIFF(month,Vacant_Start,Vacant_End))-mod(sum(TIMESTAMPDIFF(month,Vacant_Start,Vacant_End)),12))/12 as years, mod(sum(TIMESTAMPDIFF(month,Vacant_Start,Vacant_End)),12) as months  from Vacant;')
@@ -627,23 +647,43 @@ def question_4():
     cursor.close()
     conn.close()
     print('The Vice President Office has been vacant for: ', result[0], ' years and: ', result[1], ' Months')
-    print('')
+    print('#####################################################################')
 
 
 def question_5():
+    print('QUESTION 5')
+    print(' ')
     conn = create_connection()
     cursor = conn.cursor()
     query = ('Select President_Name,President_Age,Presidency_Start from Presidents where President_Age = (Select min(President_Age) from Presidents);')
     cursor.execute(query, )
-    result = cursor.fetchone()
+    result = cursor.fetchall()
     cursor.close()
     conn.close()
     print('The youngest serving President was : \n')
-    print(result)
-    print('')
+    for items in result:
+        print('Name:',  items[0], ' Age: ', items[1], ' Start of Presidency', items[2])
+    print('#####################################################################')
+
+def question_6():
+    print('QUESTION 6')
+    print(' ')
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('select President_Name, President_Age from Presidents where DATEDIFF(Presidency_End,President_Birth) = (Select max(DATEDIFF(Presidency_End,President_Birth )) from Presidents);')
+    cursor.execute(query, )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    print('The oldest serving President was : \n')
+    for items in result:
+        print('Name: ', items[0], ' Age: ', items[1])
+    print('#####################################################################')
 
 
 def question_7():
+    print('QUESTION 7')
+    print(' ')
     conn = create_connection()
     cursor = conn.cursor()
     query = ('select President_Name, max(DATEDIFF(Presidency_End, Presidency_Start)) as Length_Of_Term from Presidents where DATEDIFF(Presidency_Start, Presidency_End) = (select max(DATEDIFF(Presidency_Start, Presidency_End)) from Presidents) Group by President_Name;')
@@ -651,24 +691,72 @@ def question_7():
     result = cursor.fetchone()
     cursor.close()
     conn.close()
-    print('The Presidential Term in days was : ', result[0], ' served by: ', result[1])
+    print('The Shortest Presidential Term in days was : ', result[0], ' served by: ', result[1])
     print(result)
-    print('')
+    print('#####################################################################')
+
+
+def question_8():
+    print('QUESTION 8')
+    print(' ')
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('select Party, count(President_Name) as temp from Presidents group by Party Having temp = count(President_Name);')
+    cursor.execute(query, )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    for items in result:
+        print(round(items[1]/45*100, 2), '% of the presidents were ', items[0])
+    print('#####################################################################')
+
+
+def question_9():
+    print('QUESTION 9')
+    print(' ')
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('select President_Name, State from Presidents;')
+    cursor.execute(query, )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    print('The Presidents by State : \n')
+    for items in result:
+        print('Name: ', items[0], ' State: ', items[1]  )
+    print('#####################################################################')
+
+def question_11():
+    print('QUESTION 11')
+    print(' ')
+    conn = create_connection()
+    cursor = conn.cursor()
+    query = ('select State,count(State) as num_occurrences from Presidents group by State Having num_occurrences = 1;')
+    cursor.execute(query, )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    print('The States that only produced one President are : \n')
+    print(result)
+    print('#####################################################################')
 
 
 
 #result = get_html()
 #data = remove_tags(result)
 #parse_html(data)
-get_extra_data()
-#alter_President_table()
-#question_1()
-#question_2()
-#question_3()
-#question_4()
-#question_5()
-#question_6()
-#question_7()
+states = get_states()
+
+#get_extra_data()
+question_1()
+question_2()
+question_3()
+question_4()
+question_5()
+question_6()
+question_7()
+question_8()
+question_9()
 
 
 
