@@ -663,6 +663,7 @@ def question_3():
     result = cursor.fetchall()
     cursor.close()
     conn.close()
+    print('The number of presidents who were also vice presidents is: ', len(result), '. They are \n')
     for items in result:
         conn = create_connection()
         cursor = conn.cursor()
@@ -697,14 +698,14 @@ def question_5():
     conn = create_connection()
     cursor = conn.cursor()
     query = (
-    'Select President_Name,President_Age,Presidency_Start from Presidents where President_Age = (Select min(President_Age) from Presidents);')
+    'select President_Name, TIMESTAMPDIFF(year,President_Birth,Presidency_Start),Presidency_Start from Presidents where DATEDIFF(Presidency_Start,President_Birth) = (Select min(DATEDIFF(Presidency_Start,President_Birth )) from Presidents);')
     cursor.execute(query, )
     result = cursor.fetchall()
     cursor.close()
     conn.close()
-    print('The youngest serving President was : \n')
+    print('The youngest President to assume office was : \n')
     for items in result:
-        print('Name:', items[0], ' Age: ', items[1], ' Start of Presidency', items[2])
+        print('Name:', items[0], ' Assumed office at Age: ', items[1], ' Start of Presidency', items[2])
     print('#####################################################################')
 
 
@@ -736,8 +737,7 @@ def question_7():
     result = cursor.fetchone()
     cursor.close()
     conn.close()
-    print('The Shortest Presidential Term in days was : ', result[0], ' served by: ', result[1])
-    print(result)
+    print('The Shortest Presidential Term in days was : ', result[1], ' served by: ', result[0])
     print('#####################################################################')
 
 
