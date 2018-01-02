@@ -88,19 +88,34 @@ def change_types(data):
     return data
 
 
+def create_graph1(data):
+    graph1_data = data.groupby(['Location'])['Rain (mm)'].mean()
+    temp_df = graph1_data.to_frame()
+    temp_df.reset_index(level=0, inplace=True)  # index gets converted to a column
+    print(temp_df)
+
+    output_file('graph1.html')
+    p = figure(x_range=temp_df['Location'].tolist(), plot_width=3200, plot_height=400)
+
+    p.line(temp_df['Location'].tolist(), temp_df['Rain (mm)'].tolist(), line_width=2)
+    p.circle(temp_df['Location'].tolist(), temp_df['Rain (mm)'].tolist(), fill_color="blue", size=8)
+
+    show(p)
+
+
 data = get_data()
 data = create_multiIndex(data)
 data = fix_windspeed(data)
 data = fill_trace(data)
 data = fill_numeric_blanks(data)
 data = change_types(data)
+create_graph1(data)
 
-graph1_data = data.groupby(['Location'])['Rain (mm)'].mean()
-print(graph1_data)
-print(type(graph1_data))
-output_file('graph1.html')
-p = figure(plot_width=400, plot_height=400)
-#p = vbar(x=data[])
+
+
+#p = figure(x_range = temp_df['Location'].tolist(), plot_width=4000, plot_height=400)
+#p.vbar(temp_df['Location'].tolist(), top = temp_df['Rain (mm)'].tolist(), width=2)
+
 #print(data.loc[data['Location'] == 'MARKREE SLIGO(A)'])
 
 
