@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 from urllib import request
 from bokeh.plotting import figure, output_file, show
-from bokeh.models import DatetimeTickFormatter,ContinuousTicker,tickers
+from bokeh.models import DatetimeTickFormatter,tickers
+import altair as alt
 
 
 def get_data():
@@ -12,6 +13,7 @@ def get_data():
 
 
 def create_multiIndex(data):
+    data['Dates'] = data['Date']
     data = data.set_index(["Date","Time"], drop=False)
     return data
 
@@ -52,12 +54,14 @@ def fill_trace(data):
 
 
 def fill_dashes(row,items,value, col_names):
+
     if row[items] == 'n/a':
         row[items] = value
     if row[items] == '--':
         new_value = value
     else:
         new_value = row[items]
+    row.fillna(value)
     return new_value
 
 
@@ -72,7 +76,7 @@ def fill_numeric_blanks(data):
 
 
 def fill_descriptive_blanks(data):
-    col_names = ['Date', 'Time', 'Location', 'Wind Direction','Weather' ]
+    col_names = ['Date', 'Time', 'Location', 'Wind Direction','Weather','Dates' ]
     for items in col_names:
         value = 'Unknown'
         data[items] = data.apply(fill_dashes, axis=1, args=(items,value, col_names))
@@ -124,7 +128,7 @@ def create_graph2(data):
 def create_graph3(data):
     #how has rainfall rates changed over time
 
-    graph1_data = data.groupby(['Date'])['Rain (mm)'].mean()
+    graph1_data = data.groupby(['Dates'])['Rain (mm)'].mean()
     temp_df = graph1_data.to_frame()
     temp_df.reset_index(level=0, inplace=True)  # index gets converted to a column
 
@@ -133,10 +137,28 @@ def create_graph3(data):
     p.xaxis[0].axis_label = 'Date'
     p.yaxis[0].axis_label = 'Rainfall (mm)'
 
-    p.line(temp_df['Date'].tolist(), temp_df['Rain (mm)'].tolist(), line_width=2)
+    p.line(temp_df['Dates'].tolist(), temp_df['Rain (mm)'].tolist(), line_width=2)
     p.xaxis.formatter = DatetimeTickFormatter(days=["%d/%b"])
     p.xaxis[0].ticker.desired_num_ticks = 10
     show(p)
+
+def create_windSpeed_bin(data):
+    means = data.groupby(['Location'])['Wind Speed (kts)'].mean()
+    means = means.to_frame()
+    bins = pd.cut(means['Wind Speed (kts)'], 3, labels=['Low', 'Average', 'High'])
+    bins = bins.to_frame()
+
+    means.columns.values[0] = 'Max Wind Speed (kts)'
+
+    new_df = pd.concat([means, bins], axis=1, join_axes=[means.index])
+    new_df.reset_index(level=0, inplace=True)  # convert index to a column
+    new_df
+    alt.Chart(new_df).mark_bar().encode(
+        x='Location',
+        y='Max Wind Speed (kts)',
+        color='Wind Speed (kts)'
+    )
+
 
 
 data = get_data()
@@ -148,13 +170,27 @@ data = change_types(data)
 create_graph1(data)
 create_graph2(data)
 create_graph3(data)
+create_windSpeed_bin(data)
 
 
 
-#p = figure(x_range = temp_df['Location'].tolist(), plot_width=4000, plot_height=400)
-#p.vbar(temp_df['Location'].tolist(), top = temp_df['Rain (mm)'].tolist(), width=2)
+a = data.groupby(['Location'])['Wind Speed (kts)'].mean()
+a = a.to_frame()
+a
+b = pd.cut(a['Wind Speed (kts)'], 3, labels=['Low','Average','High'])
+b.to_frame()
+df = data.groupby(['Location'])['Wind Speed (kts)'].mean()
+df= df.to_frame()
+df.columns.values[0] = 'Max Wind Speed (kts)'
 
-#print(data.loc[data['Location'] == 'MARKREE SLIGO(A)'])
+temp_df = b.to_frame()
+new_df = pd.concat([df,temp_df],axis=1,join_axes=[df.index])
+
+alt.Chart(new_df).mark_bar().encode(
+    x='Location',
+    y='Max Wind Speed (kts)',
+    color= 'Wind Speed (kts)'
+)
 
 
 
