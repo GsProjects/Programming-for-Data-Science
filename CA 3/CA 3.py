@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from urllib import request
 from bokeh.plotting import figure, output_file, show
+from bokeh.models import DatetimeTickFormatter,ContinuousTicker,tickers
 
 
 def get_data():
@@ -92,14 +93,49 @@ def create_graph1(data):
     graph1_data = data.groupby(['Location'])['Rain (mm)'].mean()
     temp_df = graph1_data.to_frame()
     temp_df.reset_index(level=0, inplace=True)  # index gets converted to a column
-    print(temp_df)
 
-    output_file('graph1.html')
+    output_file('avg_rainfall.html')
     p = figure(x_range=temp_df['Location'].tolist(), plot_width=3200, plot_height=400)
+    p.xaxis[0].axis_label = 'Location'
+    p.yaxis[0].axis_label = 'Rainfall (mm)'
 
     p.line(temp_df['Location'].tolist(), temp_df['Rain (mm)'].tolist(), line_width=2)
     p.circle(temp_df['Location'].tolist(), temp_df['Rain (mm)'].tolist(), fill_color="blue", size=8)
 
+    show(p)
+
+
+def create_graph2(data):
+    graph1_data = data.groupby(['Location'])['Temp (◦C)'].mean()
+    temp_df = graph1_data.to_frame()
+    temp_df.reset_index(level=0, inplace=True)  # index gets converted to a column
+
+    output_file('avg_temp.html')
+    p = figure(x_range=temp_df['Location'].tolist(), plot_width=3200, plot_height=400)
+    p.xaxis[0].axis_label = 'Location'
+    p.yaxis[0].axis_label = 'Temperature (◦C)'
+
+    p.line(temp_df['Location'].tolist(), temp_df['Temp (◦C)'].tolist(), line_width=2)
+    p.circle(temp_df['Location'].tolist(), temp_df['Temp (◦C)'].tolist(), fill_color="red", size=8)
+
+    show(p)
+
+
+def create_graph3(data):
+    #how has rainfall rates changed over time
+
+    graph1_data = data.groupby(['Date'])['Rain (mm)'].mean()
+    temp_df = graph1_data.to_frame()
+    temp_df.reset_index(level=0, inplace=True)  # index gets converted to a column
+
+    output_file('rain_vs_temp.html')
+    p = figure(x_axis_type="datetime", plot_width=1200, plot_height=400)
+    p.xaxis[0].axis_label = 'Date'
+    p.yaxis[0].axis_label = 'Rainfall (mm)'
+
+    p.line(temp_df['Date'].tolist(), temp_df['Rain (mm)'].tolist(), line_width=2)
+    p.xaxis.formatter = DatetimeTickFormatter(days=["%d/%b"])
+    p.xaxis[0].ticker.desired_num_ticks = 10
     show(p)
 
 
@@ -110,6 +146,8 @@ data = fill_trace(data)
 data = fill_numeric_blanks(data)
 data = change_types(data)
 create_graph1(data)
+create_graph2(data)
+create_graph3(data)
 
 
 
