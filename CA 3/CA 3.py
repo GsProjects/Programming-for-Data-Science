@@ -155,10 +155,14 @@ def create_bin_graphs(data):
     for items in columns:
         means = data.groupby(['Location'])[items].mean()
         means = means.to_frame()
-        bins = pd.cut(means[items], 3, labels=['Low', 'Average', 'High'])
+        bins = pd.cut(means[items], 3, labels=['Low', 'Moderate', 'High'])
         bins = bins.to_frame()
 
-        bins.columns.values[0] = 'Average ' + items
+        bracket = items.index('(')
+        legend = items[:bracket]
+
+        bins.columns.values[0] = 'Average ' + legend + 'Category '
+        means.columns.values[0] = 'Average ' + items + ' Per Station'
 
         new_df = pd.concat([means, bins], axis=1, join_axes=[means.index])
         new_df.reset_index(level=0, inplace=True)
