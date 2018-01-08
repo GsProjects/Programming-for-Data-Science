@@ -1,10 +1,8 @@
 import numpy as np
 import pandas as pd
 from urllib import request as r
-from bokeh.plotting import figure, output_file, show
-from bokeh.models import DatetimeTickFormatter, tickers
+from bokeh.plotting import figure
 from bokeh.embed import components
-from bokeh.io import output_notebook
 import altair as alt
 from altair import Axis,Y
 from flask import Flask, render_template,request
@@ -16,6 +14,7 @@ app = Flask(__name__)
 def get_data():
     data = r.urlopen("http://paulbarry.itcarlow.ie/weatherdata/weather_reports.csv")
     csv_data = pd.read_csv(data, sep='|', dayfirst=True, parse_dates=[0], encoding='utf-8')
+    csv_data.dropna(axis=0, how='all')
     return csv_data
 
 
@@ -112,9 +111,7 @@ def create_graph1(data):
     temp_df = graph1_data.to_frame()
     temp_df.reset_index(level=0, inplace=True)  # index gets converted to a column
 
-    output_notebook()
-    #output_file('avg_rainfall.html')
-    p = figure(x_range=temp_df['Location'].tolist(), plot_width=1200, plot_height=600)
+    p = figure(x_range=temp_df['Location'].tolist(), plot_width=1000, plot_height=400)
     p.xaxis[0].axis_label = 'Location'
     p.yaxis[0].axis_label = 'Average Rainfall (mm)'
 
@@ -122,7 +119,6 @@ def create_graph1(data):
     p.circle(temp_df['Location'].tolist(), temp_df['Rain (mm)'].tolist(), fill_color="red", size=8)
     p.xaxis.major_label_orientation = 45
     p.yaxis.major_label_orientation = "vertical"
-    show(p)
     return p
 
 
@@ -133,9 +129,7 @@ def create_graph2(data):
     temp_df = graph1_data.to_frame()
     temp_df.reset_index(level=0, inplace=True)  # index gets converted to a column
 
-    output_notebook()
-    #output_file('templates/avg_temp.html')
-    p = figure(x_range=temp_df['Location'].tolist(), plot_width=1200, plot_height=600)
+    p = figure(x_range=temp_df['Location'].tolist(), plot_width=1000, plot_height=400)
     p.xaxis[0].axis_label = 'Location'
     p.yaxis[0].axis_label = 'Average Temperature (◦C)'
 
@@ -143,25 +137,20 @@ def create_graph2(data):
     p.circle(temp_df['Location'].tolist(), temp_df['Temp (◦C)'].tolist(), fill_color="red", size=8)
     p.xaxis.major_label_orientation = 45
     p.yaxis.major_label_orientation = "vertical"
-    show(p)
     return p
 
 
 
 
 def create_graph3(data):
-    # how has rainfall rates changed over time
-
     graph1_data = data.groupby(['Wind Direction'])['Wind Speed (kts)'].mean()
     temp_df = graph1_data.to_frame()
     temp_df.reset_index(level=0, inplace=True)  # index gets converted to a column
 
-    # output_file('rain_vs_temp.html')
-    p = figure(x_range=temp_df['Wind Direction'].tolist(), plot_width=1200, plot_height=600)
+    p = figure(x_range=temp_df['Wind Direction'].tolist(), plot_width=1000, plot_height=400)
     p.xaxis[0].axis_label = 'Wind Direction'
-    p.yaxis[0].axis_label = 'Wind Speed (kts)'
+    p.yaxis[0].axis_label = 'Average Wind Speed (kts)'
 
-    p.line(temp_df['Wind Direction'].tolist(), temp_df['Wind Speed (kts)'].tolist(), line_width=2)
     p.circle(temp_df['Wind Direction'].tolist(), temp_df['Wind Speed (kts)'].tolist(), fill_color="red", size=8)
     p.xaxis.major_label_orientation = 45
     p.yaxis.major_label_orientation = "vertical"
@@ -214,7 +203,7 @@ def start():
 @app.route('/')
 def home():
     data = start()
-    graph_names=['1. Average Rainfall vs. Location', '2. Average Temperature vs. Location', '3. Average Wind Speed vs. Wind Direction',
+    graph_names=['--Select a Graph --', '1. Average Rainfall vs. Location', '2. Average Temperature vs. Location', '3. Average Wind Speed vs. Wind Direction',
                  '4. Average Wind Speeds Categorized', '5. Average Rainfall Categorized', '6. Average Temperature Categorized', '7. Average Humidity Categorized']
     dates = list(set(data['Dates'].tolist()))
     dates = sorted(dates)
@@ -224,17 +213,19 @@ def home():
     locations.insert(0, 'All')
 
     return render_template('home.html',
-                           title='Weather Data', graphs=graph_names, Dates=dates, locs=locations)
+                           title='Weather Data', graph_list=graph_names, Dates=dates, locs=locations)
 
 @app.route('/Display_graph', methods=['POST'])
 def display_graphs():
     if request.method == 'POST':
         data = start()
-        graph = request.form.get('graph')[0]
+        graph = request.form.get('selected_graph')[0]
         date =  request.form.get('dates')
         location = request.form.get('location')
 
-        if date != 'All' and location != 'All':
+        if str(date) == 'None' and str(location) == 'None':
+            data = data
+        elif date != 'All' and location != 'All':
             data = data.loc[data['Dates'] == date]
             data = data.loc[data['Location'] == location]
         elif date == 'All' and location != 'All':
