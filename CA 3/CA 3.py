@@ -14,7 +14,7 @@ app = Flask(__name__)
 def get_data():
     data = r.urlopen("http://paulbarry.itcarlow.ie/weatherdata/weather_reports.csv")
     csv_data = pd.read_csv(data, sep='|', dayfirst=True, parse_dates=[0], encoding='utf-8')
-    csv_data.dropna(axis=0, how='all')
+    csv_data.dropna(axis=1, how='all')
     return csv_data
 
 
@@ -77,6 +77,7 @@ def fill_numeric_blanks(data):
     for items in col_names:
         value = '-1'
         data[items] = data.apply(fill_dashes, axis=1, args=(items, value))
+    for items in col_names:
         data[items] = data[items].fillna('0')
 
     return data
@@ -87,6 +88,9 @@ def fill_descriptive_blanks(data):
     for items in col_names:
         value = 'Unknown'
         data[items] = data.apply(fill_dashes, axis=1, args=(items, value))
+    for items in col_names:
+        value = 'Unknown'
+        data[items] = data[items].fillna(value)
     return data
 
 
@@ -122,8 +126,6 @@ def create_graph1(data):
     return p
 
 
-
-
 def create_graph2(data):
     graph1_data = data.groupby(['Location'])['Temp (◦C)'].mean()
     temp_df = graph1_data.to_frame()
@@ -138,8 +140,6 @@ def create_graph2(data):
     p.xaxis.major_label_orientation = 45
     p.yaxis.major_label_orientation = "vertical"
     return p
-
-
 
 
 def create_graph3(data):
@@ -215,12 +215,13 @@ def home():
     return render_template('home.html',
                            title='Weather Data', graph_list=graph_names, Dates=dates, locs=locations)
 
+
 @app.route('/Display_graph', methods=['POST'])
 def display_graphs():
     if request.method == 'POST':
         data = start()
         graph = request.form.get('selected_graph')[0]
-        date =  request.form.get('dates')
+        date = request.form.get('dates')
         location = request.form.get('location')
 
         if str(date) == 'None' and str(location) == 'None':
@@ -234,7 +235,6 @@ def display_graphs():
             data = data.loc[data['Dates'] == date]
         elif date == 'All' and location == 'All':
             data = data
-
 
         if graph == '1':
             plot = create_graph1(data)
