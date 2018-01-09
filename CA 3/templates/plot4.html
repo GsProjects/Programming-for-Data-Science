@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<head>
+  <title>Vega-Lite Chart</title>
+  <meta charset="utf-8">
+
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/2.6.5/vega.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/1.2.1/vega-lite.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/2.2.0/vega-embed.min.js" charset="utf-8"></script>
+
+  <style media="screen">
+    /* Add space between vega-embed links  */
+    .vega-actions a {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Container for the visualization -->
+  <div id="vis"></div>
+
+  <script>
+  var vlSpec = {
+    "encoding": {
+        "color": {
+            "field": "Average Humidity Category ",
+            "type": "nominal"
+        },
+        "x": {
+            "field": "Location",
+            "type": "nominal"
+        },
+        "y": {
+            "axis": {
+                "format": "f"
+            },
+            "field": "Average Humidity (%) Per Station",
+            "type": "quantitative"
+        }
+    },
+    "mark": "bar",
+    "data": {
+        "values": [
+            {
+                "Location": "ATHENRY GALWAY(A)",
+                "Average Humidity (%) Per Station": 88.94852941176471,
+                "Average Humidity Category ": "High"
+            },
+            {
+                "Location": "BALLYHAISE CAVAN(A)",
+                "Average Humidity (%) Per Station": 90.73774509803921,
+                "Average Humidity Category ": "High"
+            },
+            {
+                "Location": "BELMULLET(A)",
+                "Average Humidity (%) Per Station": 83.11519607843137,
+                "Average Humidity Category ": "Low"
+            },
+            {
+                "Location": "CASEMENT AERODROME",
+                "Average Humidity (%) Per Station": 87.40808823529412,
+                "Average Humidity Category ": "Moderate"
+            },
+            {
+                "Location": "CLAREMORRIS(A)",
+                "Average Humidity (%) Per Station": 89.83088235294117,
+                "Average Humidity Category ": "High"
+            },
+            {
+                "Location": "CORK AIRPORT",
+                "Average Humidity (%) Per Station": 90.93014705882354,
+                "Average Humidity Category ": "High"
+            },
+            {
+                "Location": "DUBLIN AIRPORT",
+                "Average Humidity (%) Per Station": 86.72916666666667,
+                "Average Humidity Category ": "Moderate"
+            },
+            {
+                "Location": "DUNSANY MEATH(A)",
+                "Average Humidity (%) Per Station": 89.05882352941177,
+                "Average Humidity Category ": "High"
+            },
+            {
+                "Location": "FINNER DONEGAL(A)",
+                "Average Humidity (%) Per Station": 84.14950980392157,
+                "Average Humidity Category ": "Low"
+            },
+            {
+                "Location": "GURTEEN TIPPERARY(A",
+                "Average Humidity (%) Per Station": 89.81740196078431,
+                "Average Humidity Category ": "High"
+            },
+            {
+                "Location": "JOHNSTOWN CASTLE(A)",
+                "Average Humidity (%) Per Station": 86.38970588235294,
+                "Average Humidity Category ": "Moderate"
+            },
+            {
+                "Location": "KNOCK AIRPORT(P)",
+                "Average Humidity (%) Per Station": 91.13480392156863,
+                "Average Humidity Category ": "High"
+            },
+            {
+                "Location": "MACE HEAD GALWAY(A)",
+                "Average Humidity (%) Per Station": 84.64828431372548,
+                "Average Humidity Category ": "Low"
+            },
+            {
+                "Location": "MALIN HEAD(A)",
+                "Average Humidity (%) Per Station": 81.11887254901961,
+                "Average Humidity Category ": "Low"
+            },
+            {
+                "Location": "MARKREE SLIGO(A)",
+                "Average Humidity (%) Per Station": 86.25612745098039,
+                "Average Humidity Category ": "Moderate"
+            },
+            {
+                "Location": "MOOREPARK CORK(A)",
+                "Average Humidity (%) Per Station": 87.34191176470588,
+                "Average Humidity Category ": "Moderate"
+            },
+            {
+                "Location": "MT DILLON ROSCOM(A)",
+                "Average Humidity (%) Per Station": 91.7279411764706,
+                "Average Humidity Category ": "High"
+            },
+            {
+                "Location": "MULLINGAR(A)",
+                "Average Humidity (%) Per Station": 90.0968137254902,
+                "Average Humidity Category ": "High"
+            },
+            {
+                "Location": "NEWPORT MAYO(A)",
+                "Average Humidity (%) Per Station": 85.87867647058823,
+                "Average Humidity Category ": "Moderate"
+            },
+            {
+                "Location": "OAK PARK CARLOW(A)",
+                "Average Humidity (%) Per Station": 87.87377450980392,
+                "Average Humidity Category ": "Moderate"
+            },
+            {
+                "Location": "PHOENIX PARK(A)",
+                "Average Humidity (%) Per Station": 83.15686274509804,
+                "Average Humidity Category ": "Low"
+            },
+            {
+                "Location": "ROCHES POINT(A)",
+                "Average Humidity (%) Per Station": 84.97671568627452,
+                "Average Humidity Category ": "Moderate"
+            },
+            {
+                "Location": "SHANNON AIRPORT",
+                "Average Humidity (%) Per Station": 87.98406862745098,
+                "Average Humidity Category ": "Moderate"
+            },
+            {
+                "Location": "SHERKIN ISLAND(A)",
+                "Average Humidity (%) Per Station": 81.98039215686275,
+                "Average Humidity Category ": "Low"
+            },
+            {
+                "Location": "VALENTIA(A)",
+                "Average Humidity (%) Per Station": 81.94975490196079,
+                "Average Humidity Category ": "Low"
+            }
+        ]
+    },
+    "$schema": "https://vega.github.io/schema/vega-lite/v1.2.1.json"
+}
+
+  var embedSpec = {
+    mode: "vega-lite",  // Instruct Vega-Embed to use the Vega-Lite compiler
+    spec: vlSpec
+  };
+
+  // Embed the visualization in the container with id `vis`
+  vg.embed("#vis", embedSpec, function(error, result) {
+    // Callback receiving the View instance and parsed Vega spec
+    // result.view is the View, which resides under the '#vis' element
+  });
+  </script>
+</body>
+</html>

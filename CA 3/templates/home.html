@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block body %}
+ <script type="text/javascript">
+     function incorrect_fields()
+     {
+        var graph = document.getElementById('selected_graph').value;
+        if ( graph[0] == "-")
+        {
+            window.alert("Please Select a Graph");
+            return false;
+        }
+
+     }
+
+     function field_change()
+     {
+        var graph = document.getElementById('selected_graph').value;
+        if( parseInt(graph[0]) > 3)
+        {
+            document.getElementById("selected_date").disabled = true;
+            document.getElementById("selected_location").disabled = true;
+            document.getElementById("selected_date").value = 'All';
+            document.getElementById("selected_location").value = 'All';
+
+        }
+        else
+        {
+            document.getElementById("selected_date").disabled = false;
+            document.getElementById("selected_location").disabled = false;
+        }
+     }
+
+ </script>
+    <div class=".navbar-form form-border">
+        <form action="/Display_graph" method=POST>
+
+            <label >Select a Graph</label>
+            <br>
+            <select id="selected_graph" name="selected_graph" class="form_display" onchange="field_change()" onload="field_change()">
+                {% for graph_item in graph_list %}
+				    <option>{{graph_item}}</option>
+				{% endfor %}
+            </select>
+            <br>
+
+            <label >Select a Date</label>
+            <br>
+            <select id="selected_date" name="dates" class="form_display" >
+                {% for items in Dates %}
+				    <option>{{items}}</option>
+				{% endfor %}
+            </select>
+            <br>
+            <label >Select a Location</label>
+            <br>
+            <select id="selected_location" name="location" class="form_display" >
+                {% for i in locs %}
+				    <option>{{i}}</option>
+				{% endfor %}
+            </select>
+            <br>
+
+            <button class="btn btn-success" onclick=" return incorrect_fields()">Generate Graph</button>
+
+            <br>
+        </form>
+        </div>
+
+
+{% endblock %}

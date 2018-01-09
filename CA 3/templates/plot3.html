@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<head>
+  <title>Vega-Lite Chart</title>
+  <meta charset="utf-8">
+
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/2.6.5/vega.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/1.2.1/vega-lite.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-embed/2.2.0/vega-embed.min.js" charset="utf-8"></script>
+
+  <style media="screen">
+    /* Add space between vega-embed links  */
+    .vega-actions a {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Container for the visualization -->
+  <div id="vis"></div>
+
+  <script>
+  var vlSpec = {
+    "encoding": {
+        "color": {
+            "field": "Average Temp Category ",
+            "type": "nominal"
+        },
+        "x": {
+            "field": "Location",
+            "type": "nominal"
+        },
+        "y": {
+            "axis": {
+                "format": "f"
+            },
+            "field": "Average Temp (\u25e6C) Per Station",
+            "type": "quantitative"
+        }
+    },
+    "mark": "bar",
+    "data": {
+        "values": [
+            {
+                "Location": "ATHENRY GALWAY(A)",
+                "Average Temp (\u25e6C) Per Station": 5.25,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "BALLYHAISE CAVAN(A)",
+                "Average Temp (\u25e6C) Per Station": 4.573529411764706,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "BELMULLET(A)",
+                "Average Temp (\u25e6C) Per Station": 6.582107843137255,
+                "Average Temp Category ": "Moderate"
+            },
+            {
+                "Location": "CASEMENT AERODROME",
+                "Average Temp (\u25e6C) Per Station": 5.1556372549019605,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "CLAREMORRIS(A)",
+                "Average Temp (\u25e6C) Per Station": 4.949754901960785,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "CORK AIRPORT",
+                "Average Temp (\u25e6C) Per Station": 5.971813725490196,
+                "Average Temp Category ": "Moderate"
+            },
+            {
+                "Location": "DUBLIN AIRPORT",
+                "Average Temp (\u25e6C) Per Station": 5.110294117647059,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "DUNSANY MEATH(A)",
+                "Average Temp (\u25e6C) Per Station": 4.702205882352941,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "FINNER DONEGAL(A)",
+                "Average Temp (\u25e6C) Per Station": 5.824754901960785,
+                "Average Temp Category ": "Moderate"
+            },
+            {
+                "Location": "GURTEEN TIPPERARY(A",
+                "Average Temp (\u25e6C) Per Station": 5.072303921568627,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "JOHNSTOWN CASTLE(A)",
+                "Average Temp (\u25e6C) Per Station": 6.154411764705882,
+                "Average Temp Category ": "Moderate"
+            },
+            {
+                "Location": "KNOCK AIRPORT(P)",
+                "Average Temp (\u25e6C) Per Station": 4.245098039215686,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "MACE HEAD GALWAY(A)",
+                "Average Temp (\u25e6C) Per Station": 6.966911764705882,
+                "Average Temp Category ": "High"
+            },
+            {
+                "Location": "MALIN HEAD(A)",
+                "Average Temp (\u25e6C) Per Station": 6.292892156862745,
+                "Average Temp Category ": "Moderate"
+            },
+            {
+                "Location": "MARKREE SLIGO(A)",
+                "Average Temp (\u25e6C) Per Station": 4.865196078431373,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "MOOREPARK CORK(A)",
+                "Average Temp (\u25e6C) Per Station": 5.917892156862745,
+                "Average Temp Category ": "Moderate"
+            },
+            {
+                "Location": "MT DILLON ROSCOM(A)",
+                "Average Temp (\u25e6C) Per Station": 4.6911764705882355,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "MULLINGAR(A)",
+                "Average Temp (\u25e6C) Per Station": 4.458333333333333,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "NEWPORT MAYO(A)",
+                "Average Temp (\u25e6C) Per Station": 5.985294117647059,
+                "Average Temp Category ": "Moderate"
+            },
+            {
+                "Location": "OAK PARK CARLOW(A)",
+                "Average Temp (\u25e6C) Per Station": 5.153186274509804,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "PHOENIX PARK(A)",
+                "Average Temp (\u25e6C) Per Station": 5.090686274509804,
+                "Average Temp Category ": "Low"
+            },
+            {
+                "Location": "ROCHES POINT(A)",
+                "Average Temp (\u25e6C) Per Station": 7.046568627450981,
+                "Average Temp Category ": "High"
+            },
+            {
+                "Location": "SHANNON AIRPORT",
+                "Average Temp (\u25e6C) Per Station": 6.176470588235294,
+                "Average Temp Category ": "Moderate"
+            },
+            {
+                "Location": "SHERKIN ISLAND(A)",
+                "Average Temp (\u25e6C) Per Station": 8.172794117647058,
+                "Average Temp Category ": "High"
+            },
+            {
+                "Location": "VALENTIA(A)",
+                "Average Temp (\u25e6C) Per Station": 8.025735294117647,
+                "Average Temp Category ": "High"
+            }
+        ]
+    },
+    "$schema": "https://vega.github.io/schema/vega-lite/v1.2.1.json"
+}
+
+  var embedSpec = {
+    mode: "vega-lite",  // Instruct Vega-Embed to use the Vega-Lite compiler
+    spec: vlSpec
+  };
+
+  // Embed the visualization in the container with id `vis`
+  vg.embed("#vis", embedSpec, function(error, result) {
+    // Callback receiving the View instance and parsed Vega spec
+    // result.view is the View, which resides under the '#vis' element
+  });
+  </script>
+</body>
+</html>
